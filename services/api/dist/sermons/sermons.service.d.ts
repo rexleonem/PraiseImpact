@@ -1,0 +1,65 @@
+export declare const getSermons: (filters: any) => Promise<{
+    id: string;
+    created_at: Date;
+    title: string;
+    description: string;
+    speaker: string;
+    series: string | null;
+    tags: string[];
+    source_type: string;
+    video_url: string;
+    thumbnail_url: string | null;
+    duration: string | null;
+}[]>;
+export declare const getSermonById: (id: string) => Promise<{
+    id: string;
+    created_at: Date;
+    title: string;
+    description: string;
+    speaker: string;
+    series: string | null;
+    tags: string[];
+    source_type: string;
+    video_url: string;
+    thumbnail_url: string | null;
+    duration: string | null;
+} | null>;
+export declare const createSermon: (data: any) => Promise<{
+    id: string;
+    created_at: Date;
+    title: string;
+    description: string;
+    speaker: string;
+    series: string | null;
+    tags: string[];
+    source_type: string;
+    video_url: string;
+    thumbnail_url: string | null;
+    duration: string | null;
+}>;
+export declare const updateSermon: (id: string, data: any) => Promise<{
+    id: string;
+    created_at: Date;
+    title: string;
+    description: string;
+    speaker: string;
+    series: string | null;
+    tags: string[];
+    source_type: string;
+    video_url: string;
+    thumbnail_url: string | null;
+    duration: string | null;
+}>;
+export declare const deleteSermon: (id: string) => Promise<{
+    id: string;
+    created_at: Date;
+    title: string;
+    description: string;
+    speaker: string;
+    series: string | null;
+    tags: string[];
+    source_type: string;
+    video_url: string;
+    thumbnail_url: string | null;
+    duration: string | null;
+}>;

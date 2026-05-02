@@ -1,0 +1,72 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String          @id @default(uuid())
+  name          String
+  email         String          @unique
+  password_hash String
+  role          String          @default("user") // admin, user
+  created_at    DateTime        @default(now())
+  watch_history WatchHistory[]
+  prayer_requests PrayerRequest[]
+}
+
+model Sermon {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  speaker       String
+  series        String?
+  tags          String[]
+  source_type   String   // youtube, cloudinary
+  video_url     String
+  thumbnail_url String?
+  duration      String?
+  created_at    DateTime @default(now())
+  watch_history WatchHistory[]
+}
+
+model LiveSession {
+  id                String    @id @default(uuid())
+  is_live           Boolean   @default(false)
+  youtube_video_id  String?
+  started_at        DateTime?
+  ended_at          DateTime?
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  location    String?
+  created_at  DateTime @default(now())
+}
+
+model PrayerRequest {
+  id           String   @id @default(uuid())
+  user_id      String?
+  user         User?    @relation(fields: [user_id], references: [id])
+  message      String
+  is_anonymous Boolean  @default(false)
+  status       String   @default("pending") // pending, prayed, responded
+  created_at   DateTime @default(now())
+}
+
+model WatchHistory {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  sermon_id  String
+  sermon     Sermon   @relation(fields: [sermon_id], references: [id])
+  progress   Int      @default(0) // seconds
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, sermon_id])
+}

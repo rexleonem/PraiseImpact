@@ -18,7 +18,7 @@ export default function LiveControlPage() {
       const res = await api.get('/live');
       if (res.data) {
         setIsLive(res.data.is_live);
-        setVideoId(res.data.youtube_video_id || '');
+        setVideoId(res.data.video_id || '');
       }
     } catch (err) {
       console.log('Error fetching live status', err);
@@ -33,12 +33,12 @@ export default function LiveControlPage() {
 
     setLoading(true);
     try {
-      const res = await api.patch('/live', {
-        is_live: !isLive,
-        youtube_video_id: videoId
+      const res = await api.put('/live', {
+        isLive: !isLive,
+        videoId: videoId
       });
       setIsLive(res.data.is_live);
-      if (!res.data.is_live) setVideoId(''); // Clear on stop
+      // Keep videoId as per Stage 2 requirements for replay
     } catch (err) {
       console.log('Error updating live status', err);
       alert('Failed to update live status.');

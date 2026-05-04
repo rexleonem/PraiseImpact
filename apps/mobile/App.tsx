@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import TabNavigator from './src/navigation/TabNavigator';
 import SermonDetailScreen from './src/screens/Sermons/SermonDetailScreen';
+import LivePlayerScreen from './src/screens/Live/LivePlayerScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,7 @@ export default function App() {
             headerTintColor: '#f8fafc'
           }} 
         />
+        <Stack.Screen name="LivePlayer" component={LivePlayerScreen} />
       </Stack.Navigator>
       <StatusBar style="light" />
     </NavigationContainer>

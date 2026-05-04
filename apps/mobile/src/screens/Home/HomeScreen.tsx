@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Radio, Play } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000'; // Update with local IP for real device
+const API_URL = 'https://praiseimpact.vercel.app';
 
 export default function HomeScreen() {
+  const navigation = useNavigation<any>();
   const [liveStatus, setLiveStatus] = useState<any>(null);
 
   useEffect(() => {
@@ -18,6 +20,8 @@ export default function HomeScreen() {
       }
     };
     fetchLiveStatus();
+    const interval = setInterval(fetchLiveStatus, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -28,16 +32,19 @@ export default function HomeScreen() {
       </View>
 
       {liveStatus?.is_live && (
-        <TouchableOpacity style={styles.liveBanner}>
+        <TouchableOpacity 
+          style={styles.liveBanner}
+          onPress={() => navigation.navigate('LivePlayer', { videoId: liveStatus.video_id })}
+        >
           <View style={styles.liveIndicator}>
             <Radio color="#ef4444" size={16} />
             <Text style={styles.liveText}>LIVE NOW</Text>
           </View>
           <Text style={styles.liveTitle}>Join our Sunday Service</Text>
-          <TouchableOpacity style={styles.watchButton}>
+          <View style={styles.watchButton}>
             <Play color="#fff" size={16} fill="#fff" />
             <Text style={styles.watchText}>Watch Now</Text>
-          </TouchableOpacity>
+          </View>
         </TouchableOpacity>
       )}
 

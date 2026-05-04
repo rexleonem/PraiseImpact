@@ -7,66 +7,46 @@ generator client {
 }
 
 model User {
-  id            String          @id @default(uuid())
-  name          String
-  email         String          @unique
-  password_hash String
-  role          String          @default("user") // admin, user
-  created_at    DateTime        @default(now())
-  watch_history WatchHistory[]
-  prayer_requests PrayerRequest[]
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  role       Role     @default(USER)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Sermon {
-  id            String   @id @default(uuid())
+  id            String     @id @default(uuid())
   title         String
   description   String
-  speaker       String
-  series        String?
-  tags          String[]
-  source_type   String   // youtube, cloudinary
   video_url     String
+  source_type   SourceType
   thumbnail_url String?
-  duration      String?
-  created_at    DateTime @default(now())
-  watch_history WatchHistory[]
+  duration      Int? // In seconds
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+  @@map("sermons")
 }
 
 model LiveSession {
-  id                String    @id @default(uuid())
-  is_live           Boolean   @default(false)
-  youtube_video_id  String?
-  started_at        DateTime?
-  ended_at          DateTime?
+  id         String    @id @default(uuid())
+  is_live    Boolean   @default(false)
+  video_id   String?
+  started_at DateTime?
+  updated_at DateTime  @updatedAt
+
+  @@map("live_sessions")
 }
 
-model Event {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  date        DateTime
-  location    String?
-  created_at  DateTime @default(now())
+enum Role {
+  ADMIN
+  USER
 }
 
-model PrayerRequest {
-  id           String   @id @default(uuid())
-  user_id      String?
-  user         User?    @relation(fields: [user_id], references: [id])
-  message      String
-  is_anonymous Boolean  @default(false)
-  status       String   @default("pending") // pending, prayed, responded
-  created_at   DateTime @default(now())
-}
-
-model WatchHistory {
-  id         String   @id @default(uuid())
-  user_id    String
-  user       User     @relation(fields: [user_id], references: [id])
-  sermon_id  String
-  sermon     Sermon   @relation(fields: [sermon_id], references: [id])
-  progress   Int      @default(0) // seconds
-  updated_at DateTime @updatedAt
-
-  @@unique([user_id, sermon_id])
+enum SourceType {
+  YOUTUBE
+  CLOUDINARY
 }

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import YoutubeIframe from 'react-native-youtube-iframe';
 import { Download, Share2, PlayCircle, Headphones } from 'lucide-react-native';
@@ -27,22 +27,37 @@ export default function SermonDetailScreen({ route }: any) {
     }
   }, []);
 
+  const formatDuration = (seconds: number | undefined) => {
+    if (!seconds) return '0 mins';
+    const mins = Math.floor(seconds / 60);
+    return `${mins} mins`;
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.playerContainer}>
-        {sermon.source_type === 'youtube' && !audioOnly ? (
-          <YoutubeIframe
-            height={220}
-            play={playing}
-            videoId={sermon.video_url}
-            onChangeState={onStateChange}
-          />
-        ) : sermon.source_type === 'cloudinary' || audioOnly ? (
+        {sermon.source_type === 'YOUTUBE' && !audioOnly ? (
+          Platform.OS === 'web' ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${sermon.video_url}?autoplay=1&modestbranding=1`}
+              style={{ width: '100%', height: 220, border: 'none' }}
+              allow="autoplay; fullscreen"
+              allowFullScreen
+            />
+          ) : (
+            <YoutubeIframe
+              height={220}
+              play={playing}
+              videoId={sermon.video_url}
+              onChangeState={onStateChange}
+            />
+          )
+        ) : sermon.source_type === 'CLOUDINARY' || audioOnly ? (
            <View style={styles.nativePlayerWrapper}>
             <Video
               style={styles.nativePlayer}
               source={{
-                uri: sermon.video_url, // For audioOnly, this should point to an audio track or use the video as audio
+                uri: sermon.video_url,
               }}
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
@@ -62,7 +77,7 @@ export default function SermonDetailScreen({ route }: any) {
         <View style={styles.titleRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>{sermon.title}</Text>
-            <Text style={styles.speaker}>{sermon.speaker} • {sermon.duration}</Text>
+            <Text style={styles.speaker}>{sermon.speaker || 'Pastor'} • {formatDuration(sermon.duration)}</Text>
           </View>
         </View>
 

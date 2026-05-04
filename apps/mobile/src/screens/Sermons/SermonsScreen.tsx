@@ -4,29 +4,51 @@ import { Search, Filter, Play } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://praiseimpact.vercel.app';
 
 export default function SermonsScreen() {
-  const [sermons, setSermons] = useState([]);
+  const [sermons, setSermons] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState('');
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
-    const fetchSermons = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/sermons`);
-        setSermons(res.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchSermons();
+    fetchSermons(1);
   }, []);
+
+  const fetchSermons = async (pageNum: number) => {
+    if (loading || (!hasMore && pageNum > 1)) return;
+    
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/sermons?page=${pageNum}&limit=10`);
+      if (res.data.length < 10) setHasMore(false);
+      
+      if (pageNum === 1) {
+        setSermons(res.data);
+      } else {
+        setSermons(prev => [...prev, ...res.data]);
+      }
+      setPage(pageNum);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (hasMore && !loading) {
+      fetchSermons(page + 1);
+    }
+  };
 
   const renderSermon = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.sermonCard}
-      onPress={() => navigation.navigate('SermonDetail' as never, { sermon: item } as never)}
+      onPress={() => navigation.navigate('SermonDetail', { sermon: item })}
     >
       <Image source={{ uri: item.thumbnail_url || 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?q=80&w=1470&auto=format&fit=crop' }} style={styles.thumbnail} />
       <View style={styles.cardOverlay}>
@@ -64,6 +86,9 @@ export default function SermonsScreen() {
         contentContainerStyle={styles.listContent}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
       />
     </View>
   );
@@ -133,5 +158,10 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontSize: 12,
     marginTop: 4,
+  },
+  loadingText: {
+    color: '#94a3b8',
+    textAlign: 'center',
+    padding: 16,
   }
 });

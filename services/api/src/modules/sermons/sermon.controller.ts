@@ -12,7 +12,9 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const sermons = await sermonService.getSermons();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const sermons = await sermonService.getSermons({ page, limit });
     res.json(sermons);
   } catch (error) {
     next(error);

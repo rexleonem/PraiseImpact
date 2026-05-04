@@ -4,8 +4,13 @@ export const createSermon = async (data: any) => {
   return prisma.sermon.create({ data });
 };
 
-export const getSermons = async () => {
+export const getSermons = async (options: { page?: number; limit?: number }) => {
+  const { page = 1, limit = 10 } = options;
+  const skip = (page - 1) * limit;
+
   return prisma.sermon.findMany({
+    skip,
+    take: limit,
     orderBy: { created_at: 'desc' },
   });
 };

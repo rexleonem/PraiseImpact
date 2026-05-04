@@ -6,6 +6,7 @@ import liveRoutes from './modules/live/live.routes';
 import userRoutes from './modules/users/user.routes';
 import prayerRoutes from './modules/prayers/prayer.routes';
 import eventRoutes from './modules/events/event.routes';
+import analyticsRoutes from './modules/analytics/analytics.routes';
 import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/live', liveRoutes);
 app.use('/users', userRoutes);
 app.use('/prayers', prayerRoutes);
 app.use('/events', eventRoutes);
+app.use('/analytics', analyticsRoutes);
 
 // Health check
 app.get('/', (req, res) => {

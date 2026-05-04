@@ -2,12 +2,20 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, SafeAreaView, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { ChevronLeft } from 'lucide-react-native';
+import { trackEvent } from '../../utils/analytics';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function LivePlayerScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { videoId } = route.params as { videoId: string };
+
+  React.useEffect(() => {
+    trackEvent('start_live_view', undefined, { videoId });
+    return () => {
+      trackEvent('end_live_view', undefined, { videoId });
+    };
+  }, [videoId]);
 
   return (
     <SafeAreaView style={styles.container}>

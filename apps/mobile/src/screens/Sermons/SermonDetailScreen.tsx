@@ -6,6 +6,7 @@ import YoutubeIframe from 'react-native-youtube-iframe';
 import { Download, Share2, PlayCircle, Headphones, Trash2, CheckCircle2 } from 'lucide-react-native';
 import { savePlaybackPosition, getPlaybackPosition } from '../../utils/storage';
 import { downloadSermonAudio, getLocalUri, deleteDownload } from '../../utils/downloads';
+import { trackEvent } from '../../utils/analytics';
 
 const API_URL = 'https://praiseimpact.vercel.app';
 
@@ -24,6 +25,10 @@ export default function SermonDetailScreen({ route }: any) {
       fetchSermon(sermonId);
     }
     checkDownloadStatus();
+    
+    if (sermon?.id) {
+       trackEvent('view_sermon', sermon.id);
+    }
   }, [sermonId]);
 
   const checkDownloadStatus = async () => {
@@ -134,6 +139,7 @@ export default function SermonDetailScreen({ route }: any) {
                 // @ts-ignore
                 if(status.didJustFinish) {
                   setPlaying(false);
+                  trackEvent('complete', sermon.id);
                 }
                 // @ts-ignore
                 if (status.isPlaying) {

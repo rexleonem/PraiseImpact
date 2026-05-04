@@ -84,6 +84,17 @@ model RSVP {
   @@map("rsvps")
 }
 
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  userId     String?
+  type       String // view_sermon | start_live | end_live | pause | resume | complete
+  sermonId   String?
+  meta       Json?
+  created_at DateTime @default(now())
+
+  @@map("analytics_events")
+}
+
 enum Role {
   ADMIN
   USER

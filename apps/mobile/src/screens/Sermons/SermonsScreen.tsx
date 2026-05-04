@@ -16,6 +16,7 @@ export default function SermonsScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState('');
   const [isOffline, setIsOffline] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
   const navigation = useNavigation<any>();
 
   useEffect(() => {
@@ -104,6 +105,20 @@ export default function SermonsScreen() {
         <TouchableOpacity>
           <Filter color="#94a3b8" size={20} />
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.filterSection}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+          {['All', 'Recent', 'Popular', 'Teaching', 'Worship'].map((chip) => (
+            <TouchableOpacity 
+              key={chip} 
+              style={[styles.filterChip, activeFilter === chip && styles.filterChipActive]}
+              onPress={() => setActiveFilter(chip)}
+            >
+              <Text style={[styles.filterText, activeFilter === chip && styles.filterTextActive]}>{chip}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       <FlatList
@@ -227,5 +242,32 @@ const styles = StyleSheet.create({
   skeletonCard: {
     width: '48%',
     marginBottom: 24,
+  },
+  filterSection: {
+    marginBottom: 16,
+  },
+  filterScroll: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  filterChipActive: {
+    backgroundColor: '#4f46e5',
+    borderColor: '#6366f1',
+  },
+  filterText: {
+    color: '#94a3b8',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  filterTextActive: {
+    color: '#fff',
   }
 });

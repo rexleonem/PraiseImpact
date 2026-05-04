@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import NetInfo from '@react-native-community/netinfo';
 import { cacheData, getCachedData } from '../../utils/storage';
+import { Skeleton } from '../../components/Skeleton';
 
 const API_URL = 'https://praiseimpact.vercel.app';
 
@@ -114,7 +115,22 @@ export default function SermonsScreen() {
         columnWrapperStyle={styles.columnWrapper}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+        ListEmptyComponent={loading && sermons.length === 0 ? (
+          <View style={styles.skeletonContainer}>
+            {[1,2,3,4,5,6].map(i => (
+              <View key={i} style={styles.skeletonCard}>
+                <Skeleton width="100%" height={120} borderRadius={16} />
+                <View style={{ marginTop: 12 }}>
+                  <Skeleton width="80%" height={16} borderRadius={4} />
+                  <View style={{ marginTop: 8 }}>
+                    <Skeleton width="40%" height={12} borderRadius={4} />
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : null}
+        ListFooterComponent={loading && sermons.length > 0 ? <Text style={styles.loadingText}>Loading...</Text> : null}
       />
     </View>
   );
@@ -202,5 +218,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  skeletonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  skeletonCard: {
+    width: '48%',
+    marginBottom: 24,
   }
 });

@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import * as sermonService from './sermon.service';
+import { sermonSchema } from '../../utils/validation';
 
 export const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const sermon = await sermonService.createSermon(req.body);
+    const validatedData = sermonSchema.parse(req.body);
+    const sermon = await sermonService.createSermon(validatedData);
     res.status(201).json(sermon);
   } catch (error) {
     next(error);
@@ -33,7 +35,8 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 
 export const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const sermon = await sermonService.updateSermon(req.params.id, req.body);
+    const validatedData = sermonSchema.partial().parse(req.body);
+    const sermon = await sermonService.updateSermon(req.params.id, validatedData);
     res.json(sermon);
   } catch (error) {
     next(error);

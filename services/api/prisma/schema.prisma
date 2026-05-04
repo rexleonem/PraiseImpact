@@ -32,6 +32,7 @@ model Sermon {
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
 
+  @@index([created_at])
   @@map("sermons")
 }
 
@@ -68,6 +69,7 @@ model Event {
   updated_at  DateTime @updatedAt
   rsvps       RSVP[]
 
+  @@index([event_date])
   @@map("events")
 }
 
@@ -81,6 +83,8 @@ model RSVP {
   event Event @relation(fields: [eventId], references: [id])
 
   @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
   @@map("rsvps")
 }
 
@@ -92,6 +96,9 @@ model AnalyticsEvent {
   meta       Json?
   created_at DateTime @default(now())
 
+  @@index([type])
+  @@index([sermonId])
+  @@index([created_at])
   @@map("analytics_events")
 }
 

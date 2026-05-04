@@ -1,15 +1,34 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ScrollView } from 'react-native';
-import { Send, UserCircle2 } from 'lucide-react-native';
+import { Send, UserCircle2, Clock, CheckCircle2, Heart } from 'lucide-react-native';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://praiseimpact.vercel.app';
 
 export default function PrayerScreen() {
   const [message, setMessage] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [prayers, setPrayers] = useState<any[]>([]);
+  const [fetching, setFetching] = useState(true);
+  React.useEffect(() => {
+    fetchMyPrayers();
+  }, []);
 
+  const fetchMyPrayers = async () => {
+    setFetching(true);
+    try {
+      // In a real app, you'd get the token from storage
+      const token = ''; 
+      const res = await axios.get(`${API_URL}/prayers/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPrayers(res.data);
+    } catch (err) {
+      console.log('Fetch error', err);
+    } finally {
+      setFetching(false);
+    }
+  };
   const handleSubmit = async () => {
     if (!message.trim()) {
       Alert.alert('Error', 'Please enter a prayer request');
@@ -18,18 +37,38 @@ export default function PrayerScreen() {
 
     setLoading(true);
     try {
-      await axios.post(`${API_URL}/prayer`, {
-        message,
-        is_anonymous: isAnonymous,
+      const token = ''; // Get from storage
+      await axios.post(`${API_URL}/prayers`, {
+        content: message,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       Alert.alert('Success', 'Your prayer request has been submitted.');
       setMessage('');
-      setIsAnonymous(false);
+      fetchMyPrayers();
     } catch (err) {
       console.log('Submit error', err);
-      Alert.alert('Error', 'Failed to submit prayer request. Please try again.');
+      Alert.alert('Error', 'Failed to submit prayer request.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending': return <Clock color="#94a3b8" size={16} />;
+      case 'praying': return <Heart color="#ef4444" size={16} />;
+      case 'answered': return <CheckCircle2 color="#22c55e" size={16} />;
+      default: return null;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return '#94a3b8';
+      case 'praying': return '#ef4444';
+      case 'answered': return '#22c55e';
+      default: return '#94a3b8';
     }
   };
 
@@ -77,6 +116,27 @@ export default function PrayerScreen() {
             {loading ? 'Submitting...' : 'Send Request'}
           </Text>
         </TouchableOpacity>
+
+        <View style={styles.listSection}>
+          <Text style={styles.sectionTitle}>My Requests</Text>
+          {fetching ? (
+            <Text style={styles.emptyText}>Loading...</Text>
+          ) : prayers.length === 0 ? (
+            <Text style={styles.emptyText}>No requests yet.</Text>
+          ) : (
+            prayers.map((item) => (
+              <View key={item.id} style={styles.prayerCard}>
+                <Text style={styles.prayerContent}>{item.content}</Text>
+                <View style={styles.statusRow}>
+                  {getStatusIcon(item.status)}
+                  <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
+                    {item.status.toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
       </View>
     </ScrollView>
   );
@@ -154,5 +214,44 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  listSection: {
+    marginTop: 40,
+    paddingBottom: 40,
+  },
+  sectionTitle: {
+    color: '#f8fafc',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  emptyText: {
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  prayerCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  prayerContent: {
+    color: '#f8fafc',
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });

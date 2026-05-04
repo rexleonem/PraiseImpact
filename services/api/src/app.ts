@@ -4,6 +4,8 @@ import authRoutes from './modules/auth/auth.routes';
 import sermonRoutes from './modules/sermons/sermon.routes';
 import liveRoutes from './modules/live/live.routes';
 import userRoutes from './modules/users/user.routes';
+import prayerRoutes from './modules/prayers/prayer.routes';
+import eventRoutes from './modules/events/event.routes';
 import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
@@ -16,6 +18,8 @@ app.use('/auth', authRoutes);
 app.use('/sermons', sermonRoutes);
 app.use('/live', liveRoutes);
 app.use('/users', userRoutes);
+app.use('/prayers', prayerRoutes);
+app.use('/events', eventRoutes);
 
 // Health check
 app.get('/', (req, res) => {

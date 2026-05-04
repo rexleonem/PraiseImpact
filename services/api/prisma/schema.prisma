@@ -7,13 +7,15 @@ generator client {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  password   String
-  role       Role     @default(USER)
-  pushToken  String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id              String          @id @default(uuid())
+  email           String          @unique
+  password        String
+  role            Role            @default(USER)
+  pushToken       String?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  prayer_requests PrayerRequest[]
+  rsvps           RSVP[]
 
   @@map("users")
 }
@@ -40,6 +42,45 @@ model LiveSession {
   updated_at DateTime  @updatedAt
 
   @@map("live_sessions")
+}
+
+model PrayerRequest {
+  id         String   @id @default(uuid())
+  userId     String
+  content    String
+  status     String   @default("pending") // pending | praying | answered
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("prayer_requests")
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  location    String?
+  event_date  DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  rsvps       RSVP[]
+
+  @@map("events")
+}
+
+model RSVP {
+  id         String   @id @default(uuid())
+  userId     String
+  eventId    String
+  created_at DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+  @@map("rsvps")
 }
 
 enum Role {

@@ -1,24 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Calendar, MapPin } from 'lucide-react-native';
+import { Calendar, MapPin, Check } from 'lucide-react-native';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://praiseimpact.vercel.app';
 
 export default function EventsScreen() {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [myRsvps, setMyRsvps] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/events`);
-        setEvents(res.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchEvents();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const token = ''; // Get from storage
+      const [eventsRes, myEventsRes] = await Promise.all([
+        axios.get(`${API_URL}/events`),
+        axios.get(`${API_URL}/events/me`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+      setEvents(eventsRes.data);
+      setMyRsvps(myEventsRes.data.map((e: any) => e.id));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRSVP = async (eventId: string) => {
+    try {
+      const token = ''; // Get from storage
+      await axios.post(`${API_URL}/events/${eventId}/rsvp`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMyRsvps([...myRsvps, eventId]);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
@@ -28,15 +51,15 @@ export default function EventsScreen() {
   const renderEvent = ({ item }: { item: any }) => (
     <View style={styles.eventCard}>
       <View style={styles.dateBox}>
-        <Text style={styles.dateDay}>{new Date(item.date).getDate()}</Text>
-        <Text style={styles.dateMonth}>{new Date(item.date).toLocaleString('default', { month: 'short' })}</Text>
+        <Text style={styles.dateDay}>{new Date(item.event_date).getDate()}</Text>
+        <Text style={styles.dateMonth}>{new Date(item.event_date).toLocaleString('default', { month: 'short' })}</Text>
       </View>
       <View style={styles.eventInfo}>
         <Text style={styles.eventTitle}>{item.title}</Text>
         <View style={styles.eventMeta}>
           <View style={styles.metaRow}>
             <Calendar color="#94a3b8" size={14} />
-            <Text style={styles.metaText}>{formatDate(item.date)}</Text>
+            <Text style={styles.metaText}>{formatDate(item.event_date)}</Text>
           </View>
           {item.location && (
             <View style={styles.metaRow}>
@@ -45,8 +68,15 @@ export default function EventsScreen() {
             </View>
           )}
         </View>
-        <TouchableOpacity style={styles.rsvpButton}>
-          <Text style={styles.rsvpText}>RSVP / Details</Text>
+        <TouchableOpacity 
+          style={[styles.rsvpButton, myRsvps.includes(item.id) && styles.rsvpButtonActive]}
+          onPress={() => !myRsvps.includes(item.id) && handleRSVP(item.id)}
+          disabled={myRsvps.includes(item.id)}
+        >
+          {myRsvps.includes(item.id) && <Check color="#fff" size={14} style={{ marginRight: 4 }} />}
+          <Text style={[styles.rsvpText, myRsvps.includes(item.id) && styles.rsvpTextActive]}>
+            {myRsvps.includes(item.id) ? 'RSVP Confirmed' : 'I\'m Interested'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -133,15 +163,23 @@ const styles = StyleSheet.create({
   },
   rsvpButton: {
     backgroundColor: '#334155',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rsvpButtonActive: {
+    backgroundColor: '#4f46e5',
   },
   rsvpText: {
     color: '#e2e8f0',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  rsvpTextActive: {
+    color: '#fff',
   },
   emptyContainer: {
     flex: 1,

@@ -11,6 +11,7 @@ model User {
   email      String   @unique
   password   String
   role       Role     @default(USER)
+  pushToken  String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

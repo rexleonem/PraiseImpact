@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './modules/auth/auth.routes';
 import sermonRoutes from './modules/sermons/sermon.routes';
 import liveRoutes from './modules/live/live.routes';
+import userRoutes from './modules/users/user.routes';
 import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/sermons', sermonRoutes);
 app.use('/live', liveRoutes);
+app.use('/users', userRoutes);
 
 // Health check
 app.get('/', (req, res) => {

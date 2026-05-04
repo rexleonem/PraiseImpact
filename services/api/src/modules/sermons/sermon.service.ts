@@ -1,7 +1,16 @@
 import prisma from '../../config/database';
+import { notifyAllUsers } from '../notifications/notification.service';
 
 export const createSermon = async (data: any) => {
-  return prisma.sermon.create({ data });
+  const sermon = await prisma.sermon.create({ data });
+  
+  await notifyAllUsers(
+    "📖 New Sermon Available", 
+    sermon.title, 
+    { type: 'sermon', id: sermon.id }
+  );
+
+  return sermon;
 };
 
 export const getSermons = async (options: { page?: number; limit?: number }) => {

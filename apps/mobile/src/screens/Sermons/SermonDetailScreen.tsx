@@ -1,24 +1,36 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 import { Video, ResizeMode } from 'expo-av';
 import YoutubeIframe from 'react-native-youtube-iframe';
 import { Download, Share2, PlayCircle, Headphones } from 'lucide-react-native';
 
-export default function SermonDetailScreen({ route }: any) {
-  const { sermon } = route.params || { 
-    sermon: {
-      title: 'The Power of Faith',
-      speaker: 'Pastor John Doe',
-      series: 'Faith Foundations',
-      description: 'Join us as we explore what it means to truly walk by faith in our everyday lives. This powerful message will equip you to face challenges with unwavering trust in God.',
-      source_type: 'youtube', // 'youtube' or 'cloudinary'
-      video_url: 'dQw4w9WgXcQ', // Youtube ID or Cloudinary URL
-      duration: '45 mins'
-    }
-  };
+const API_URL = 'https://praiseimpact.vercel.app';
 
+export default function SermonDetailScreen({ route }: any) {
+  const { sermon: initialSermon, sermonId } = route.params || {};
+  const [sermon, setSermon] = useState<any>(initialSermon);
+  const [loading, setLoading] = useState(!initialSermon && !!sermonId);
   const [playing, setPlaying] = useState(false);
   const [audioOnly, setAudioOnly] = useState(false);
+
+  useEffect(() => {
+    if (!sermon && sermonId) {
+      fetchSermon(sermonId);
+    }
+  }, [sermonId]);
+
+  const fetchSermon = async (id: string) => {
+    try {
+      const res = await axios.get(`${API_URL}/sermons/${id}`);
+      setSermon(res.data);
+    } catch (err) {
+      console.error('Error fetching sermon', err);
+      Alert.alert('Error', 'Could not load sermon details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onStateChange = useCallback((state: string) => {
     if (state === 'ended') {
@@ -32,6 +44,22 @@ export default function SermonDetailScreen({ route }: any) {
     const mins = Math.floor(seconds / 60);
     return `${mins} mins`;
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
+
+  if (!sermon) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: '#fff' }}>Sermon not found</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>

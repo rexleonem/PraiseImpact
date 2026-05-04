@@ -31,7 +31,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const updateStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const prayer = await prayerService.updatePrayerStatus(req.params.id, req.body.status);
+    const prayer = await prayerService.updatePrayerStatus(req.params.id as string, req.body.status);
     res.json(prayer);
   } catch (error) {
     next(error);

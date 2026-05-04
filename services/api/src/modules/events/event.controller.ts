@@ -22,7 +22,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const rsvp = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const rsvp = await eventService.rsvpEvent(req.user!.userId, req.params.id);
+    const rsvp = await eventService.rsvpEvent(req.user!.userId, req.params.id as string);
     res.status(201).json(rsvp);
   } catch (error) {
     next(error);

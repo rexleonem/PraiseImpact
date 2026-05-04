@@ -8,10 +8,28 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const result = await authService.login(email, password);
     
     if (!result) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
     
     res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const register = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await authService.createUser(req.body);
+    res.status(201).json({ success: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMe = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const user = await authService.getUserById(req.user.userId);
+    res.json({ success: true, user });
   } catch (error) {
     next(error);
   }

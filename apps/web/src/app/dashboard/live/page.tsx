@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Radio, StopCircle, RefreshCw, Save } from 'lucide-react';
+import { Radio, StopCircle, RefreshCw, Save, Activity } from 'lucide-react';
 import api from '@/lib/api';
 
 export default function LiveControlPage() {

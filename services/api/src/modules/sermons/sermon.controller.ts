@@ -25,7 +25,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const getOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const sermon = await sermonService.getSermonById(req.params.id);
+    const sermon = await sermonService.getSermonById(req.params.id as string);
     if (!sermon) return res.status(404).json({ message: 'Sermon not found' });
     res.json(sermon);
   } catch (error) {
@@ -36,7 +36,7 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 export const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validatedData = sermonSchema.partial().parse(req.body);
-    const sermon = await sermonService.updateSermon(req.params.id, validatedData);
+    const sermon = await sermonService.updateSermon(req.params.id as string, validatedData);
     res.json(sermon);
   } catch (error) {
     next(error);
@@ -45,7 +45,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
 
 export const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await sermonService.deleteSermon(req.params.id);
+    await sermonService.deleteSermon(req.params.id as string);
     res.status(204).end();
   } catch (error) {
     next(error);

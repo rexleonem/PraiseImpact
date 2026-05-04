@@ -4,22 +4,12 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
-export const createUser = async (data: any) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-  return prisma.user.create({
-    data: {
-      email: data.email,
-      password: hashedPassword,
-    },
-  });
-};
-
-export const validateUser = async (data: any) => {
+export const login = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({
-    where: { email: data.email },
+    where: { email },
   });
 
-  if (!user || !(await bcrypt.compare(data.password, user.password))) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     return null;
   }
 
@@ -29,7 +19,18 @@ export const validateUser = async (data: any) => {
     { expiresIn: '7d' }
   );
 
-  return { user, token };
+  const { password: _, ...userWithoutPassword } = user;
+  return { user: userWithoutPassword, token };
+};
+
+export const createUser = async (data: any) => {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  return prisma.user.create({
+    data: {
+      email: data.email,
+      password: hashedPassword,
+    },
+  });
 };
 
 export const getUserById = async (id: string) => {

@@ -14,7 +14,7 @@ const logger = pino({
   },
   redact: {
     paths: ['password', 'token', 'jwt', 'headers.authorization'],
-    placeholder: '[REDACTED]',
+    remove: true,
   },
 });
 

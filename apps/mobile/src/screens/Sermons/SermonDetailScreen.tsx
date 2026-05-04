@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, 
 import axios from 'axios';
 import { Video, ResizeMode } from 'expo-av';
 import YoutubeIframe from 'react-native-youtube-iframe';
-import { Download, Share2, PlayCircle, Headphones } from 'lucide-react-native';
+import { Download, Share2, PlayCircle, Headphones, Trash2, CheckCircle2 } from 'lucide-react-native';
+import { savePlaybackPosition, getPlaybackPosition } from '../../utils/storage';
+import { downloadSermonAudio, getLocalUri, deleteDownload } from '../../utils/downloads';
 
 const API_URL = 'https://praiseimpact.vercel.app';
 
@@ -13,12 +15,43 @@ export default function SermonDetailScreen({ route }: any) {
   const [loading, setLoading] = useState(!initialSermon && !!sermonId);
   const [playing, setPlaying] = useState(false);
   const [audioOnly, setAudioOnly] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [localUri, setLocalUri] = useState<string | null>(null);
+  const videoRef = React.useRef<Video>(null);
 
   useEffect(() => {
     if (!sermon && sermonId) {
       fetchSermon(sermonId);
     }
+    checkDownloadStatus();
   }, [sermonId]);
+
+  const checkDownloadStatus = async () => {
+    if (sermon?.id) {
+      const uri = await getLocalUri(sermon.id);
+      setLocalUri(uri);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!sermon?.audio_url || downloading) return;
+    setDownloading(true);
+    try {
+      const uri = await downloadSermonAudio(sermon.id, sermon.audio_url);
+      setLocalUri(uri);
+      Alert.alert('Success', 'Sermon audio downloaded for offline listening.');
+    } catch (err) {
+      Alert.alert('Error', 'Download failed.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDeleteDownload = async () => {
+    if (!sermon?.id) return;
+    await deleteDownload(sermon.id);
+    setLocalUri(null);
+  };
 
   const fetchSermon = async (id: string) => {
     try {
@@ -83,17 +116,29 @@ export default function SermonDetailScreen({ route }: any) {
         ) : sermon.source_type === 'CLOUDINARY' || audioOnly ? (
            <View style={styles.nativePlayerWrapper}>
             <Video
+              ref={videoRef}
               style={styles.nativePlayer}
               source={{
-                uri: sermon.video_url,
+                uri: localUri || sermon.video_url,
               }}
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
               isLooping={false}
+              onLoad={async () => {
+                const lastPos = await getPlaybackPosition(sermon.id);
+                if (lastPos > 0) {
+                  videoRef.current?.setPositionAsync(lastPos * 1000);
+                }
+              }}
               onPlaybackStatusUpdate={status => {
                 // @ts-ignore
                 if(status.didJustFinish) {
                   setPlaying(false);
+                }
+                // @ts-ignore
+                if (status.isPlaying) {
+                   // @ts-ignore
+                  savePlaybackPosition(sermon.id, Math.floor(status.positionMillis / 1000));
                 }
               }}
             />
@@ -117,10 +162,21 @@ export default function SermonDetailScreen({ route }: any) {
             <Headphones color={audioOnly ? '#fff' : '#94a3b8'} size={20} />
             <Text style={[styles.actionText, audioOnly && styles.actionTextActive]}>Audio</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Download color="#94a3b8" size={20} />
-            <Text style={styles.actionText}>Download</Text>
-          </TouchableOpacity>
+          {localUri ? (
+            <TouchableOpacity style={styles.actionButton} onPress={handleDeleteDownload}>
+              <Trash2 color="#ef4444" size={20} />
+              <Text style={[styles.actionText, { color: '#ef4444' }]}>Remove</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={handleDownload}
+              disabled={downloading || !sermon.audio_url}
+            >
+              <Download color={downloading ? '#4f46e5' : "#94a3b8"} size={20} />
+              <Text style={styles.actionText}>{downloading ? 'Downloading...' : 'Download'}</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.actionButton}>
             <Share2 color="#94a3b8" size={20} />
             <Text style={styles.actionText}>Share</Text>

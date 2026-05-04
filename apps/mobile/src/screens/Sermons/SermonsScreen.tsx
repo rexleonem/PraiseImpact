@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput } from 'react-native';
-import { Search, Filter, Play } from 'lucide-react-native';
+import { Search, Filter, Play, WifiOff } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import NetInfo from '@react-native-community/netinfo';
+import { cacheData, getCachedData } from '../../utils/storage';
 
 const API_URL = 'https://praiseimpact.vercel.app';
 
@@ -12,11 +14,27 @@ export default function SermonsScreen() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState('');
+  const [isOffline, setIsOffline] = useState(false);
   const navigation = useNavigation<any>();
 
   useEffect(() => {
-    fetchSermons(1);
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsOffline(!state.isConnected);
+    });
+
+    loadInitialData();
+
+    return () => unsubscribe();
   }, []);
+
+  const loadInitialData = async () => {
+    // 1. Try to load from cache first for instant UI
+    const cached = await getCachedData('sermons_list');
+    if (cached) setSermons(cached);
+
+    // 2. Fetch fresh data if online
+    fetchSermons(1);
+  };
 
   const fetchSermons = async (pageNum: number) => {
     if (loading || (!hasMore && pageNum > 1)) return;
@@ -28,6 +46,7 @@ export default function SermonsScreen() {
       
       if (pageNum === 1) {
         setSermons(res.data);
+        await cacheData('sermons_list', res.data);
       } else {
         setSermons(prev => [...prev, ...res.data]);
       }
@@ -65,6 +84,13 @@ export default function SermonsScreen() {
 
   return (
     <View style={styles.container}>
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <WifiOff color="#fff" size={16} />
+          <Text style={styles.offlineText}>You are currently offline. Viewing cached sermons.</Text>
+        </View>
+      )}
+
       <View style={styles.searchBar}>
         <Search color="#94a3b8" size={20} />
         <TextInput 
@@ -163,5 +189,18 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     textAlign: 'center',
     padding: 16,
+  },
+  offlineBanner: {
+    backgroundColor: '#ef4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    gap: 8,
+  },
+  offlineText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   }
 });

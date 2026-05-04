@@ -25,6 +25,7 @@ model Sermon {
   title         String
   description   String
   video_url     String
+  audio_url     String?
   source_type   SourceType
   thumbnail_url String?
   duration      Int? // In seconds

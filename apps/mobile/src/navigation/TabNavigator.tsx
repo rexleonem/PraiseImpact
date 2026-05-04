@@ -1,13 +1,14 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Play, Calendar, User, MessageSquare } from 'lucide-react-native';
+import { Home, Play, Calendar, User, MessageSquare, Download } from 'lucide-react-native';
 
 import { 
   HomeScreen, 
   SermonsScreen, 
   EventsScreen, 
   ProfileScreen, 
-  PrayerScreen 
+  PrayerScreen,
+  DownloadsScreen
 } from '../screens';
 
 const Tab = createBottomTabNavigator();
@@ -59,6 +60,13 @@ export default function TabNavigator() {
         component={EventsScreen} 
         options={{
           tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen 
+        name="Downloads" 
+        component={DownloadsScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => <Download color={color} size={size} />,
         }}
       />
       <Tab.Screen 

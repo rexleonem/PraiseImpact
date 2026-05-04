@@ -5,6 +5,7 @@ import SermonsScreen from './Sermons/SermonsScreen';
 import PrayerScreen from './Prayer/PrayerScreen';
 import EventsScreen from './Events/EventsScreen';
 import ProfileScreen from './Profile/ProfileScreen';
+import DownloadsScreen from './Downloads/DownloadsScreen';
 
 const placeholder = (name: string) => () => (
   <View style={styles.container}>
@@ -26,4 +27,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { HomeScreen, SermonsScreen, PrayerScreen, EventsScreen, ProfileScreen };
+export { HomeScreen, SermonsScreen, PrayerScreen, EventsScreen, ProfileScreen, DownloadsScreen };

@@ -1,8 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, Alert } from 'react-native';
 import { User, Bell, Shield, Download, LogOut, ChevronRight, Moon } from 'lucide-react-native';
+import { auth } from '../../config/firebase';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ProfileScreen() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = React.useState(true);
   const [darkMode, setDarkMode] = React.useState(true);
 
@@ -12,7 +16,11 @@ export default function ProfileScreen() {
       "Are you sure you want to log out of Praise Impact?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Logout", style: "destructive", onPress: () => console.log("Logout pressed") }
+        { 
+          text: "Logout", 
+          style: "destructive", 
+          onPress: () => signOut(auth).catch(err => alert(err.message))
+        }
       ]
     );
   };
@@ -42,13 +50,13 @@ export default function ProfileScreen() {
   );
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <User color="#fff" size={40} />
         </View>
-        <Text style={styles.userName}>Brother John Doe</Text>
-        <Text style={styles.userEmail}>john.doe@example.com</Text>
+        <Text style={styles.userName}>{user?.displayName || 'Praise User'}</Text>
+        <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
       </View>
 
       <View style={styles.section}>

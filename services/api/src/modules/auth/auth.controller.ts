@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from './auth.service';
-import { loginSchema } from '../../utils/validation';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = loginSchema.parse(req.body);
+    const { email, password } = req.body;
     const result = await authService.login(email, password);
     
     if (!result) {

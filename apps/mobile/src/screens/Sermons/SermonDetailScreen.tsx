@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import YoutubeIframe from 'react-native-youtube-iframe';
 import { Download, Share2, PlayCircle, Headphones, Trash2, CheckCircle2 } from 'lucide-react-native';
 import { savePlaybackPosition, getPlaybackPosition } from '../../utils/storage';
@@ -14,11 +14,15 @@ export default function SermonDetailScreen({ route }: any) {
   const { sermon: initialSermon, sermonId } = route.params || {};
   const [sermon, setSermon] = useState<any>(initialSermon);
   const [loading, setLoading] = useState(!initialSermon && !!sermonId);
-  const [playing, setPlaying] = useState(false);
   const [audioOnly, setAudioOnly] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [localUri, setLocalUri] = useState<string | null>(null);
-  const videoRef = React.useRef<Video>(null);
+
+  // Initialize expo-video player
+  const player = useVideoPlayer(localUri || sermon?.video_url || '', (player) => {
+    player.loop = false;
+    player.play();
+  });
 
   useEffect(() => {
     if (!sermon && sermonId) {
@@ -30,6 +34,27 @@ export default function SermonDetailScreen({ route }: any) {
        trackEvent('view_sermon', sermon.id);
     }
   }, [sermonId]);
+
+  useEffect(() => {
+    if (sermon?.id) {
+      getPlaybackPosition(sermon.id).then(lastPos => {
+        if (lastPos > 0) {
+          player.currentTime = lastPos;
+        }
+      });
+    }
+  }, [sermon, player]);
+
+  // Track playback position
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (player.playing && sermon?.id) {
+        savePlaybackPosition(sermon.id, Math.floor(player.currentTime));
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [player, sermon]);
 
   const checkDownloadStatus = async () => {
     if (sermon?.id) {
@@ -70,13 +95,6 @@ export default function SermonDetailScreen({ route }: any) {
     }
   };
 
-  const onStateChange = useCallback((state: string) => {
-    if (state === 'ended') {
-      setPlaying(false);
-      Alert.alert('Sermon Finished');
-    }
-  }, []);
-
   const formatDuration = (seconds: number | undefined) => {
     if (!seconds) return '0 mins';
     const mins = Math.floor(seconds / 60);
@@ -113,40 +131,17 @@ export default function SermonDetailScreen({ route }: any) {
           ) : (
             <YoutubeIframe
               height={220}
-              play={playing}
+              play={player.playing}
               videoId={sermon.video_url}
-              onChangeState={onStateChange}
             />
           )
-        ) : sermon.source_type === 'CLOUDINARY' || audioOnly ? (
+        ) : (sermon.source_type === 'CLOUDINARY' || audioOnly) ? (
            <View style={styles.nativePlayerWrapper}>
-            <Video
-              ref={videoRef}
+            <VideoView
               style={styles.nativePlayer}
-              source={{
-                uri: localUri || sermon.video_url,
-              }}
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              isLooping={false}
-              onLoad={async () => {
-                const lastPos = await getPlaybackPosition(sermon.id);
-                if (lastPos > 0) {
-                  videoRef.current?.setPositionAsync(lastPos * 1000);
-                }
-              }}
-              onPlaybackStatusUpdate={status => {
-                // @ts-ignore
-                if(status.didJustFinish) {
-                  setPlaying(false);
-                  trackEvent('complete', sermon.id);
-                }
-                // @ts-ignore
-                if (status.isPlaying) {
-                   // @ts-ignore
-                  savePlaybackPosition(sermon.id, Math.floor(status.positionMillis / 1000));
-                }
-              }}
+              player={player}
+              allowsFullscreen
+              allowsPictureInPicture
             />
           </View>
         ) : null}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config/firebase';
-import { Mail, Lock, Chrome, ArrowRight } from 'lucide-react-native';
+import { Mail, Lock, Globe, ArrowRight } from 'lucide-react-native';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -89,7 +89,7 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-          <Chrome size={20} color="#fff" />
+          <Globe size={20} color="#fff" />
           <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
 

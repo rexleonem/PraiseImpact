@@ -8,6 +8,7 @@ const API_URL = 'https://praiseimpact.vercel.app';
 export default function PrayerScreen() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [prayers, setPrayers] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
   React.useEffect(() => {

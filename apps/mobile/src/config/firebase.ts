@@ -1,6 +1,13 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { 
+  getAuth, 
+  initializeAuth, 
+  getReactNativePersistence, 
+  Auth,
+  browserLocalPersistence
+} from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -12,11 +19,28 @@ const firebaseConfig = {
   measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
+let app: FirebaseApp;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
+}
 
-// Initialize Auth with persistence for React Native
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+let auth: Auth;
+
+if (Platform.OS === 'web') {
+  auth = getAuth(app);
+} else {
+  // For native, we MUST use initializeAuth to set persistence, 
+  // but we must also ensure we don't call it if already initialized.
+  try {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch (e) {
+    // If already initialized, just get the existing instance
+    auth = getAuth(app);
+  }
+}
 
 export { auth };

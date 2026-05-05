@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Platform } from 'react-native';
 
 import TabNavigator from './src/navigation/TabNavigator';
 import SermonDetailScreen from './src/screens/Sermons/SermonDetailScreen';
@@ -53,19 +53,21 @@ function RootNavigator() {
 
 export default function App() {
   React.useEffect(() => {
-    registerForPushNotificationsAsync();
+    if (Platform.OS !== 'web') {
+      registerForPushNotificationsAsync();
 
-    const notificationListener = Notifications.addNotificationReceivedListener(() => {});
-    const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-      const data = response.notification.request.content.data;
-      if (data.type === 'live') navigate('LivePlayer', { videoId: data.videoId });
-      if (data.type === 'sermon') navigate('SermonDetail', { sermonId: data.id });
-    });
+      const notificationListener = Notifications.addNotificationReceivedListener(() => {});
+      const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+        const data = response.notification.request.content.data;
+        if (data.type === 'live') navigate('LivePlayer', { videoId: data.videoId });
+        if (data.type === 'sermon') navigate('SermonDetail', { sermonId: data.id });
+      });
 
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
-      Notifications.removeNotificationSubscription(responseListener);
-    };
+      return () => {
+        Notifications.removeNotificationSubscription(notificationListener);
+        Notifications.removeNotificationSubscription(responseListener);
+      };
+    }
   }, []);
 
   return (

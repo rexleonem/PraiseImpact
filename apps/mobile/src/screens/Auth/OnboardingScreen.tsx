@@ -83,7 +83,7 @@ export default function OnboardingScreen({ navigation }: any) {
           <Text style={styles.buttonText}>
             {currentIndex === SLIDES.length - 1 ? 'Get Started' : 'Next'}
           </Text>
-          <ChevronRight size={20} color="#fff" />
+          <Text style={{ color: '#fff', fontSize: 20, fontWeight: 'bold' }}>→</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -763,6 +763,10 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
+"@config-plugins/repo@expo/config-plugins":
+  version "1.0.0"
+  resolved "https://codeload.github.com/expo/config-plugins/tar.gz/a48bb42c194a25adf0c92be22534912b275379a2"
+
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz"
@@ -1074,6 +1078,15 @@
     debug "^4.3.4"
     dotenv "~16.4.5"
     dotenv-expand "~11.0.6"
+    getenv "^2.0.0"
+
+"@expo/env@~2.1.2":
+  version "2.1.2"
+  resolved "https://registry.npmjs.org/@expo/env/-/env-2.1.2.tgz"
+  integrity sha512-RJtGFfj/ygO/6zcVbV3cckHf4THcEkv5IZft1GjCB3dfT6axvzvIwXE9EiQqQYmGHcQ+ZrvC8xZcIhiHba0pYg==
+  dependencies:
+    chalk "^4.0.0"
+    debug "^4.3.4"
     getenv "^2.0.0"
 
 "@expo/fingerprint@0.15.5":
@@ -2564,6 +2577,11 @@
   version "12.0.1"
   resolved "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-12.0.1.tgz"
   integrity sha512-P/3caXIvfYSJG8AWJVefukg+ZGRPs+M4Lp3pNJtgcTYoJxCjWrKQGNnCkj/Cz//zWa/avGed0i/wzm0T8vV2IQ==
+
+"@react-native-google-signin/google-signin@^16.1.2":
+  version "16.1.2"
+  resolved "https://registry.npmjs.org/@react-native-google-signin/google-signin/-/google-signin-16.1.2.tgz#fe22dd4672f6fd1559e6a3fc27811ab5359de2ba"
+  integrity sha512-1hf4pRmpnS5t0dHtqU72Q1FmWzsCZR2Sm3uVQbbfMKeNPl5TKjpAsP6F8QTZ9L+Q6Cnn9tL9BXpDCb1nyutdCQ==
 
 "@react-native/assets-registry@0.81.5":
   version "0.81.5"
@@ -5200,6 +5218,11 @@ events@^3.3.0:
   resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
+expo-application@~55.0.14:
+  version "55.0.14"
+  resolved "https://registry.npmjs.org/expo-application/-/expo-application-55.0.14.tgz"
+  integrity sha512-NgqDIt3eCf4aVLp1L6AcEanCYoyJeuBsGrgGSzOIvxAsOvp5X3SYKW3ROgpKUnLQEKMWlzwETpjsUGszcqkk8g==
+
 expo-application@~6.1.2:
   version "6.1.5"
   resolved "https://registry.npmjs.org/expo-application/-/expo-application-6.1.5.tgz"
@@ -5217,6 +5240,18 @@ expo-audio@~1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/expo-audio/-/expo-audio-1.1.1.tgz"
   integrity sha512-CPCpJ+0AEHdzWROc0f00Zh6e+irLSl2ALos/LPvxEeIcJw1APfBa4DuHPkL4CQCWsVe7EnUjFpdwpqsEUWcP0g==
+
+expo-auth-session@^55.0.15:
+  version "55.0.15"
+  resolved "https://registry.npmjs.org/expo-auth-session/-/expo-auth-session-55.0.15.tgz#6bc6d14e2d54fe6ddc6c6ec04428b9528a3d8970"
+  integrity sha512-RPnoLs6+FY2MMWnV0cqz4uNzi2b1dwjqE6vv7Izb5vWI2RCFUnBSMy1fgXp4BSWaFm0VZzeMl6UjsgVh2QFe0g==
+  dependencies:
+    expo-application "~55.0.14"
+    expo-constants "~55.0.15"
+    expo-crypto "~55.0.14"
+    expo-linking "~55.0.14"
+    expo-web-browser "~55.0.14"
+    invariant "^2.2.4"
 
 expo-av@~16.0.8:
   version "16.0.8"
@@ -5238,6 +5273,18 @@ expo-constants@~18.0.13:
   dependencies:
     "@expo/config" "~12.0.13"
     "@expo/env" "~2.0.8"
+
+expo-constants@~55.0.15, expo-constants@~55.0.16:
+  version "55.0.16"
+  resolved "https://registry.npmjs.org/expo-constants/-/expo-constants-55.0.16.tgz"
+  integrity sha512-Z15/No94UHoogD+pulxjudGAeOHTEIWZgb/vnX48Wx5D+apWTeCbnKxQZZtGQlosvduYL5kaic2/W8U+NHfBQQ==
+  dependencies:
+    "@expo/env" "~2.1.2"
+
+expo-crypto@^55.0.14, expo-crypto@~55.0.14:
+  version "55.0.14"
+  resolved "https://registry.npmjs.org/expo-crypto/-/expo-crypto-55.0.14.tgz#2a6b03f4d57c50b68b9524dbc7bd88f510032d0d"
+  integrity sha512-TfAADBGZNNv9OOmdKFJCz54wDj87ufxtzQNSY+Roycpm8e5tuCnDIL7EjqUOmNTGH99Jj8ftPGFt4KGG2Ii2fg==
 
 expo-device@~8.0.0:
   version "8.0.10"
@@ -5265,8 +5312,16 @@ expo-keep-awake@~15.0.8:
 
 expo-linear-gradient@^55.0.13:
   version "55.0.13"
-  resolved "https://registry.npmjs.org/expo-linear-gradient/-/expo-linear-gradient-55.0.13.tgz#1a61751c1623dec6dd885bf7fe152b4c5f35fbb5"
+  resolved "https://registry.npmjs.org/expo-linear-gradient/-/expo-linear-gradient-55.0.13.tgz"
   integrity sha512-Qz2T4jpkA15RIk29DBqI1TwW+8O9AN8MyC4TJPbh/5UnihH0yNNz3waplUO8Szh5OZ3czTGvtPQU4ysF3RDxwQ==
+
+expo-linking@~55.0.14:
+  version "55.0.15"
+  resolved "https://registry.npmjs.org/expo-linking/-/expo-linking-55.0.15.tgz"
+  integrity sha512-/RQh2vkNqV8Bim9Owm/evVqn2fqTvCDYHkpYPoSKbLAdydSGdHC2xZNw7Odl4wu1i1/3L4Xz//LKd3NsPWYWBQ==
+  dependencies:
+    expo-constants "~55.0.16"
+    invariant "^2.2.4"
 
 expo-modules-autolinking@3.0.25:
   version "3.0.25"
@@ -5324,6 +5379,11 @@ expo-video@~3.0.16:
   version "3.0.16"
   resolved "https://registry.npmjs.org/expo-video/-/expo-video-3.0.16.tgz"
   integrity sha512-H1HlxcHGomZItqisGfW3YL/G9BHtNBfVSimDJcLuyxyU87wFnV8loO9tCjuhufkfh/aTa2sW5BYAjLjg9DvnBQ==
+
+expo-web-browser@~55.0.14:
+  version "55.0.15"
+  resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-55.0.15.tgz"
+  integrity sha512-6hwZQob3EF+RWwZ+IvWLZjj2wI1frqx21+m/uzBqdUEHUhp2cVJi7kmxDolDmrve+ZldryZi1qfN78ALdvjHSA==
 
 expo@~54.0.33:
   version "54.0.34"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Image } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../config/firebase';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { auth, GoogleSignin } from '../../config/firebase';
 import { Mail, Lock, Globe, ArrowRight } from 'lucide-react-native';
 
 export default function LoginScreen({ navigation }: any) {
@@ -27,8 +27,31 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const handleGoogleLogin = async () => {
-    // Note: Full Google Auth requires expo-auth-session setup
-    alert('Google Auth integration pending configuration.');
+    setLoading(true);
+    setError('');
+    try {
+      if (Platform.OS === 'web') {
+        // For web, we would use signInWithPopup, but keeping it simple for mobile first
+        alert('Google Sign-in on web is pending configuration');
+        return;
+      }
+
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      
+      // userInfo.data.idToken is what we need for Firebase
+      if (!userInfo.data?.idToken) {
+        throw new Error('No ID Token found');
+      }
+
+      const credential = GoogleAuthProvider.credential(userInfo.data.idToken);
+      await signInWithCredential(auth, credential);
+    } catch (err: any) {
+      console.error('Google Sign-in Error:', err);
+      setError(err.message || 'Failed to sign in with Google');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

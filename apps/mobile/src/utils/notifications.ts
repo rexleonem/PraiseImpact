@@ -29,7 +29,7 @@ export async function registerForPushNotificationsAsync() {
       return;
     }
     token = (await Notifications.getExpoPushTokenAsync({
-        projectId: 'your-expo-project-id' // Replace with your actual project ID from app.json
+        projectId: 'b9a84921-31c0-402d-868a-7bca317840d5'
     })).data;
   } else {
     console.log('Must use physical device for Push Notifications');

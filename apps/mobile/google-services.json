@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1088804170185",
+    "project_id": "praiseimpact-fed2b",
+    "storage_bucket": "praiseimpact-fed2b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088804170185:android:e36ea780544bd460d8e018",
+        "android_client_info": {
+          "package_name": "com.praiseimpact.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU31SaJLZ5pcAlnin7pDwiL-Zsm6Wd__A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

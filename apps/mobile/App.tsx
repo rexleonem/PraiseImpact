@@ -13,6 +13,7 @@ import AuthNavigator from './src/navigation/AuthNavigator';
 import { registerForPushNotificationsAsync } from './src/utils/notifications';
 import { navigationRef, navigate } from './src/navigation/RootNavigation';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 
@@ -71,11 +72,13 @@ export default function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <NavigationContainer ref={navigationRef}>
-        <RootNavigator />
-        <StatusBar style="light" />
-      </NavigationContainer>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigationContainer ref={navigationRef}>
+          <RootNavigator />
+          <StatusBar style="light" />
+        </NavigationContainer>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, Scr
 import { Send, UserCircle2, Clock, CheckCircle2, Heart } from 'lucide-react-native';
 import axios from 'axios';
 
-const API_URL = 'https://praiseimpact.vercel.app';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
 
 export default function PrayerScreen() {
   const [message, setMessage] = useState('');

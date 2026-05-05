@@ -1,8 +1,10 @@
-import prisma from '../src/config/database';
-import bcrypt from 'bcryptjs';
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+
+const prisma = new PrismaClient({});
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('Seeding database via standalone script...');
 
   // 1. Create Admin User
   const hashedPassword = await bcrypt.hash('admin123', 10);
@@ -38,8 +40,8 @@ async function main() {
     {
       title: 'Faith Over Fear',
       description: 'Trusting God in times of great uncertainty and discovering His peace.',
-      video_url: '7VpA6X68_aM', // Example sermon video
-      source_type: 'YOUTUBE' as const,
+      video_url: '7VpA6X68_aM',
+      source_type: 'YOUTUBE',
       thumbnail_url: 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?q=80&w=1470&auto=format&fit=crop',
       duration: 3200,
     },
@@ -47,7 +49,7 @@ async function main() {
       title: 'The Power of Unwavering Faith',
       description: 'Discover how to stand firm in your faith during life\'s greatest trials.',
       video_url: 'dQw4w9WgXcQ',
-      source_type: 'YOUTUBE' as const,
+      source_type: 'YOUTUBE',
       thumbnail_url: 'https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=1470&auto=format&fit=crop',
       duration: 2450,
     },
@@ -55,7 +57,7 @@ async function main() {
       title: 'Walking in Divine Grace',
       description: 'Understanding the unmerited favor of God in your daily walk.',
       video_url: '9bZkp7q19f0',
-      source_type: 'YOUTUBE' as const,
+      source_type: 'YOUTUBE',
       thumbnail_url: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=1473&auto=format&fit=crop',
       duration: 3100,
     },
@@ -63,7 +65,7 @@ async function main() {
       title: 'Breaking Generational Chains',
       description: 'A powerful teaching on spiritual deliverance and freedom.',
       video_url: '5NV6Rdv1a3I',
-      source_type: 'YOUTUBE' as const,
+      source_type: 'YOUTUBE',
       thumbnail_url: 'https://images.unsplash.com/photo-1544427928-142ec22aafe6?q=80&w=1471&auto=format&fit=crop',
       duration: 2800,
     },
@@ -71,7 +73,7 @@ async function main() {
       title: 'Divine Restoration',
       description: 'God is able to restore all that has been lost or stolen.',
       video_url: 'dQw4w9WgXcQ',
-      source_type: 'YOUTUBE' as const,
+      source_type: 'YOUTUBE',
       thumbnail_url: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1470&auto=format&fit=crop',
       duration: 2100,
     }
@@ -89,7 +91,7 @@ async function main() {
       title: 'Sunday Worship Service',
       description: 'Join us for an atmosphere of miracles and powerful word.',
       location: 'Main Auditorium',
-      event_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // Next Sunday approx
+      event_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000),
     },
     {
       title: 'Midweek Power Encounter',

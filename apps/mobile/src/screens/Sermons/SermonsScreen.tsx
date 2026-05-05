@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { Search, Filter, Play, WifiOff } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -7,7 +7,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { cacheData, getCachedData } from '../../utils/storage';
 import { Skeleton } from '../../components/Skeleton';
 
-const API_URL = 'https://praiseimpact.vercel.app';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
 
 export default function SermonsScreen() {
   const [sermons, setSermons] = useState<any[]>([]);

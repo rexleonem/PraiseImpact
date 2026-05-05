@@ -37,11 +37,12 @@ model Sermon {
 }
 
 model LiveSession {
-  id         String    @id @default(uuid())
-  is_live    Boolean   @default(false)
-  video_id   String?
-  started_at DateTime?
-  updated_at DateTime  @updatedAt
+  id              String    @id @default(uuid())
+  is_live         Boolean   @default(false)
+  video_id        String?
+  started_at      DateTime?
+  next_service_at DateTime?
+  updated_at      DateTime  @updatedAt
 
   @@map("live_sessions")
 }

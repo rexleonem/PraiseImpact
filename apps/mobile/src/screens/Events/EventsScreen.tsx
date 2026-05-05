@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { Calendar, MapPin, Check } from 'lucide-react-native';
 import axios from 'axios';
 
-const API_URL = 'https://praiseimpact.vercel.app';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
 
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);

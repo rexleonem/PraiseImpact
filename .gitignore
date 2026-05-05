@@ -1,1 +1,43 @@
-node_modules
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Build artifacts
+build/
+android/build/
+ios/build/
+bin/
+obj/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+.vercel
+.turbo
+
+# Local env files
+.env*.local
+.env
+.env.test
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Prisma
+# Generated Prisma Client should be ignored if it's large and can be regenerated
+**/generated

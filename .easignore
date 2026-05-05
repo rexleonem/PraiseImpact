@@ -1,0 +1,31 @@
+# Ignore everything except the mobile app and workspace config
+# (Wait, usually EAS needs the whole monorepo structure but not the artifacts)
+
+# Ignore all node_modules
+node_modules/
+**/node_modules/
+
+# Ignore Next.js artifacts
+.next/
+**/ .next/
+out/
+**/out/
+
+# Ignore Expo artifacts
+.expo/
+**/ .expo/
+dist/
+**/dist/
+
+# Ignore Web app completely if not needed
+# apps/web/ 
+
+# Ignore API service completely if not needed
+# services/api/
+
+# Misc
+.DS_Store
+*.log
+.vercel
+.turbo
+.git

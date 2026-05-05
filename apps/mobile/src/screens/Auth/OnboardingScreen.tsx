@@ -1,9 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { ChevronRight } from 'lucide-react-native';
-
-const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
@@ -33,14 +31,28 @@ export default function OnboardingScreen({ navigation }: any) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const { completeOnboarding } = useAuth();
+  const { width } = useWindowDimensions();
 
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+      flatListRef.current?.scrollToIndex({ 
+        index: currentIndex + 1,
+        animated: true 
+      });
+      // Force update index for web if scroll doesn't trigger onMomentumScrollEnd
+      setCurrentIndex(currentIndex + 1);
     } else {
       completeOnboarding();
     }
   };
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems && viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index);
+    }
+  }).current;
+
+  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   return (
     <View style={styles.container}>
@@ -50,12 +62,15 @@ export default function OnboardingScreen({ navigation }: any) {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / width);
-          setCurrentIndex(index);
-        }}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewConfig}
+        getItemLayout={(_, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
         renderItem={({ item }) => (
-          <View style={[styles.slide, { backgroundColor: '#0f172a' }]}>
+          <View style={[styles.slide, { width, backgroundColor: '#0f172a' }]}>
             <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
               <Text style={styles.emoji}>{item.icon}</Text>
             </View>
@@ -96,7 +111,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0f172a',
   },
   slide: {
-    width,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,

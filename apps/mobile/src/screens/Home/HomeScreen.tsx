@@ -7,10 +7,11 @@ import { io } from 'socket.io-client';
 import { getCachedData } from '../../utils/storage';
 import { Skeleton } from '../../components/Skeleton';
 import { LinearGradient } from 'expo-linear-gradient';
+import { getEventMonth, getEventDay, getEventTime } from '../../utils/dateUtils';
 
 const { width } = Dimensions.get('window');
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
-const SOCKET_URL = API_URL.replace('/api', '').replace('https://', 'wss://').replace('http://', 'ws://'); // Adjust based on env
+const SOCKET_URL = API_URL.replace('/api', '').replace('https://', 'wss://').replace('http://', 'ws://');
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
@@ -278,14 +279,14 @@ export default function HomeScreen() {
               {upcomingEvents.length > 0 ? upcomingEvents.map((event) => (
                 <TouchableOpacity key={event.id} style={styles.eventCard} onPress={() => navigation.navigate('Events')}>
                   <View style={styles.eventDateBadge}>
-                    <Text style={styles.eventMonth}>{new Date(event.date).toLocaleString('default', { month: 'short' }).toUpperCase()}</Text>
-                    <Text style={styles.eventDay}>{new Date(event.date).getDate()}</Text>
+                    <Text style={styles.eventMonth}>{getEventMonth(event.event_date)}</Text>
+                    <Text style={styles.eventDay}>{getEventDay(event.event_date)}</Text>
                   </View>
                   <View style={styles.eventInfo}>
                     <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
                     <View style={styles.eventMeta}>
                       <Clock size={12} color="#64748b" />
-                      <Text style={styles.eventTime}>{new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                      <Text style={styles.eventTime}>{getEventTime(event.event_date)}</Text>
                     </View>
                   </View>
                   <ArrowRight size={18} color="#475569" />

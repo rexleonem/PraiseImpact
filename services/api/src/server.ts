@@ -17,17 +17,17 @@ export const io = new Server(server, {
 });
 
 // Socket connection handling
-io.on('connection', (socket) => {
+io.on('connection', (socket: any) => {
   logger.info(`New client connected: ${socket.id}`);
   
-  socket.on('join-live', (videoId) => {
+  socket.on('join-live', (videoId: string) => {
     socket.join(`live-${videoId}`);
     const viewerCount = io.sockets.adapter.rooms.get(`live-${videoId}`)?.size || 0;
     io.to(`live-${videoId}`).emit('viewer-count', viewerCount);
   });
 
   socket.on('disconnecting', () => {
-    socket.rooms.forEach(room => {
+    socket.rooms.forEach((room: string) => {
       if (room.startsWith('live-')) {
         const currentCount = io.sockets.adapter.rooms.get(room)?.size || 0;
         io.to(room).emit('viewer-count', Math.max(0, currentCount - 1));

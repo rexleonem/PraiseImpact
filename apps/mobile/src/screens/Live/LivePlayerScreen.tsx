@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, SafeAreaView, Platform, ScrollView, Animated, ActivityIndicator, Dimensions } from 'react-native';
 import YoutubePlayer from "react-native-youtube-iframe";
-import { ChevronLeft, Share2, Users, Info, MessageSquare, ExternalLink } from 'lucide-react-native';
+import { ChevronLeft, Share2, Users, Info, MessageSquare, ExternalLink, Headphones } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { io } from 'socket.io-client';
@@ -18,6 +18,7 @@ export default function LivePlayerScreen() {
   const [playing, setPlaying] = useState(true);
   const [loading, setLoading] = useState(true);
   const [viewerCount, setViewerCount] = useState(0);
+  const [audioOnly, setAudioOnly] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const socketRef = useRef<any>(null);
 
@@ -93,22 +94,43 @@ export default function LivePlayerScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* --- PLAYER SECTION --- */}
           <View style={styles.playerWrapper}>
-            {loading && (
+            {loading && !audioOnly && (
               <View style={styles.loaderOverlay}>
                 <ActivityIndicator color="#6366f1" size="large" />
               </View>
             )}
             <View style={styles.playerInner}>
-              <YoutubePlayer
-                height={width * 0.5625}
-                play={playing}
-                videoId={videoId}
-                onChangeState={onStateChange}
-                onReady={() => setLoading(false)}
-                webViewProps={{
-                  allowsFullscreenVideo: true,
-                }}
-              />
+              {audioOnly ? (
+                <View style={styles.audioPlaceholder}>
+                  <LinearGradient
+                    colors={['#312e81', '#1e1b4b']}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <Headphones color="#818cf8" size={64} strokeWidth={1} />
+                  <Text style={styles.audioPlayingText}>Live Audio Mode Active</Text>
+                  {/* Keep the player alive but hidden to continue audio */}
+                  <View style={{ width: 1, height: 1, opacity: 0 }}>
+                    <YoutubePlayer
+                      height={1}
+                      play={playing}
+                      videoId={videoId}
+                      onChangeState={onStateChange}
+                      onReady={() => setLoading(false)}
+                    />
+                  </View>
+                </View>
+              ) : (
+                <YoutubePlayer
+                  height={width * 0.5625}
+                  play={playing}
+                  videoId={videoId}
+                  onChangeState={onStateChange}
+                  onReady={() => setLoading(false)}
+                  webViewProps={{
+                    allowsFullscreenVideo: true,
+                  }}
+                />
+              )}
             </View>
           </View>
 
@@ -126,10 +148,13 @@ export default function LivePlayerScreen() {
                 <Users size={14} color="#818cf8" />
                 <Text style={styles.statText}>{viewerCount || 0} Watching</Text>
               </View>
-              <View style={styles.statPill}>
-                <MessageSquare size={14} color="#818cf8" />
-                <Text style={styles.statText}>48 Comments</Text>
-              </View>
+              <TouchableOpacity 
+                style={[styles.statPill, audioOnly && { backgroundColor: '#818cf830' }]}
+                onPress={() => setAudioOnly(!audioOnly)}
+              >
+                <Headphones size={14} color={audioOnly ? '#fff' : '#818cf8'} />
+                <Text style={[styles.statText, audioOnly && { color: '#fff' }]}>{audioOnly ? 'Video Mode' : 'Audio Only'}</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.divider} />
@@ -254,6 +279,20 @@ const styles = StyleSheet.create({
   },
   playerInner: {
     flex: 1,
+  },
+  audioPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1e1b4b',
+  },
+  audioPlayingText: {
+    color: '#818cf8',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   loaderOverlay: {
     ...StyleSheet.absoluteFillObject,

@@ -108,12 +108,29 @@ export default function SermonDetailScreen({ route, navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.playerArea}>
-        {sermon.source_type === 'YOUTUBE' && !audioOnly ? (
-          <YoutubeIframe height={240} play={player.playing} videoId={sermon.video_url} />
-        ) : (
-          <View style={styles.nativePlayerWrapper}>
-            <VideoView style={styles.nativePlayer} player={player} allowsFullscreen allowsPictureInPicture />
+        {audioOnly ? (
+          <View style={styles.audioPlaceholder}>
+            <LinearGradient
+              colors={['#312e81', '#1e1b4b']}
+              style={StyleSheet.absoluteFill}
+            />
+            <Headphones color="#818cf8" size={64} strokeWidth={1} />
+            <Text style={styles.audioPlayingText}>Audio Only Mode Active</Text>
+            {/* We still need the VideoView for native playback but we hide it */}
+            <View style={{ width: 1, height: 1, opacity: 0 }}>
+              <VideoView style={styles.nativePlayer} player={player} />
+            </View>
           </View>
+        ) : (
+          <>
+            {sermon.source_type === 'YOUTUBE' ? (
+              <YoutubeIframe height={240} play={player.playing} videoId={sermon.video_url} />
+            ) : (
+              <View style={styles.nativePlayerWrapper}>
+                <VideoView style={styles.nativePlayer} player={player} allowsFullscreen allowsPictureInPicture />
+              </View>
+            )}
+          </>
         )}
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <ChevronLeft color="#fff" size={24} />
@@ -203,6 +220,20 @@ const styles = StyleSheet.create({
   nativePlayer: {
     width: '100%',
     height: '100%',
+  },
+  audioPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1e1b4b',
+  },
+  audioPlayingText: {
+    color: '#818cf8',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   backBtn: {
     position: 'absolute',

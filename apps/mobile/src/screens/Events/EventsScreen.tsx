@@ -4,6 +4,7 @@ import { Calendar, MapPin, Check, ChevronRight, Clock } from 'lucide-react-nativ
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getEventMonth, getEventDay, getEventTime } from '../../utils/dateUtils';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
 
@@ -65,10 +66,8 @@ export default function EventsScreen() {
       >
         <View style={styles.dateSide}>
           <View style={styles.dateCircle}>
-            <Text style={styles.dateDay}>{new Date(item.event_date).getDate()}</Text>
-            <Text style={styles.dateMonth}>
-              {new Date(item.event_date).toLocaleString('default', { month: 'short' }).toUpperCase()}
-            </Text>
+            <Text style={styles.dateDay}>{getEventDay(item.event_date)}</Text>
+            <Text style={styles.dateMonth}>{getEventMonth(item.event_date)}</Text>
           </View>
           <View style={styles.dateLine} />
         </View>
@@ -78,9 +77,7 @@ export default function EventsScreen() {
           <View style={styles.metaGroup}>
             <View style={styles.metaItem}>
               <Clock color="#64748b" size={14} />
-              <Text style={styles.metaText}>
-                {new Date(item.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
+              <Text style={styles.metaText}>{getEventTime(item.event_date)}</Text>
             </View>
             <View style={styles.metaItem}>
               <MapPin color="#64748b" size={14} />

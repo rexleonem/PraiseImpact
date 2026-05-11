@@ -8,6 +8,7 @@ const router = Router();
 
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/firebase', authController.firebaseLogin);
 router.get('/me', protect, authController.getMe);
 
 export default router;

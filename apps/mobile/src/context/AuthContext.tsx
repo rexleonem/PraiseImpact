@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import { View, Text } from 'react-native';
 
 interface AuthContextType {
@@ -36,8 +37,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Firebase Auth not initialized');
       }
 
-      unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          try {
+            // Get ID Token from Firebase
+            const idToken = await firebaseUser.getIdToken();
+            
+            // Sync with our backend to get custom JWT
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/auth/firebase`, { idToken });
+            
+            if (response.data.token) {
+              await AsyncStorage.setItem('token', response.data.token);
+              // You might want to store more user info or trigger other syncs here
+            }
+            
+            setUser(firebaseUser);
+          } catch (syncErr) {
+            console.error('Backend sync failed:', syncErr);
+            setError('Authentication succeeded but failed to sync with server. Please try again.');
+          }
+        } else {
+          setUser(null);
+          await AsyncStorage.removeItem('token');
+        }
         setLoading(false);
       }, (err) => {
         console.error('onAuthStateChanged error', err);

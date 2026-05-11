@@ -33,3 +33,13 @@ export const getMe = async (req: any, res: Response, next: NextFunction) => {
     next(error);
   }
 };
+
+export const firebaseLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { idToken } = req.body;
+    const result = await authService.verifyFirebaseToken(idToken);
+    res.json(result);
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Authentication failed' });
+  }
+};

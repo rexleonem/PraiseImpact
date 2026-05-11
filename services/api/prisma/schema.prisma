@@ -1,5 +1,6 @@
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -24,6 +25,9 @@ model Sermon {
   id            String     @id @default(uuid())
   title         String
   description   String
+  speaker       String?
+  series        String?
+  tags          String[]   @default([])
   video_url     String
   audio_url     String?
   source_type   SourceType

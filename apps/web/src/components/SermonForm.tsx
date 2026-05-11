@@ -9,9 +9,12 @@ import { X, Save } from 'lucide-react';
 const sermonSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
+  speaker: z.string().optional(),
+  series: z.string().optional(),
   video_url: z.string().min(1, 'Video URL/ID is required'),
+  audio_url: z.string().optional().or(z.literal('')),
   source_type: z.enum(['YOUTUBE', 'CLOUDINARY']),
-  thumbnail_url: z.string().url().optional().or(z.literal('')),
+  thumbnail_url: z.string().optional().or(z.literal('')),
   duration: z.coerce.number().min(0).optional(),
 });
 
@@ -25,17 +28,21 @@ interface SermonFormProps {
 }
 
 export default function SermonForm({ initialData, onSubmit, onCancel, loading }: SermonFormProps) {
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<SermonFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+  } = useForm<SermonFormData>({
     resolver: zodResolver(sermonSchema),
-    defaultValues: initialData || {
-      source_type: 'YOUTUBE',
-    },
+    defaultValues: initialData || { source_type: 'YOUTUBE' },
   });
 
   const videoUrl = watch('video_url');
   const sourceType = watch('source_type');
 
-  // Bonus: Auto-generate YouTube thumbnail
+  // Auto-generate YouTube thumbnail from video ID
   React.useEffect(() => {
     if (sourceType === 'YOUTUBE' && videoUrl && videoUrl.length === 11) {
       setValue('thumbnail_url', `https://img.youtube.com/vi/${videoUrl}/maxresdefault.jpg`);
@@ -52,32 +59,55 @@ export default function SermonForm({ initialData, onSubmit, onCancel, loading }:
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6 max-h-[80vh] overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Sermon Title</label>
-              <input 
-                {...register('title')}
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
-                placeholder="e.g. The Power of Grace"
-              />
-              {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-5 max-h-[80vh] overflow-y-auto">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Sermon Title *</label>
+            <input
+              {...register('title')}
+              className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
+              placeholder="e.g. The Power of Grace"
+            />
+            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+          </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
-              <textarea 
-                {...register('description')}
-                rows={3}
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-                placeholder="What is this message about?"
-              />
-              {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
-            </div>
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Description *</label>
+            <textarea
+              {...register('description')}
+              rows={3}
+              className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+              placeholder="What is this message about?"
+            />
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Speaker */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Source Type</label>
-              <select 
+              <label className="block text-sm font-medium text-slate-300 mb-2">Speaker</label>
+              <input
+                {...register('speaker')}
+                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="e.g. Pastor James"
+              />
+            </div>
+
+            {/* Series */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Series</label>
+              <input
+                {...register('series')}
+                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="e.g. Faith & Fire"
+              />
+            </div>
+
+            {/* Source Type */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Source *</label>
+              <select
                 {...register('source_type')}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
               >
@@ -86,9 +116,10 @@ export default function SermonForm({ initialData, onSubmit, onCancel, loading }:
               </select>
             </div>
 
+            {/* Video ID / URL */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Video ID / URL</label>
-              <input 
+              <label className="block text-sm font-medium text-slate-300 mb-2">Video ID / URL *</label>
+              <input
                 {...register('video_url')}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
                 placeholder={sourceType === 'YOUTUBE' ? 'e.g. dQw4w9WgXcQ' : 'https://cloudinary.com/...'}
@@ -96,37 +127,47 @@ export default function SermonForm({ initialData, onSubmit, onCancel, loading }:
               {errors.video_url && <p className="text-red-500 text-xs mt-1">{errors.video_url.message}</p>}
             </div>
 
+            {/* Audio URL */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Thumbnail URL</label>
-              <input 
-                {...register('thumbnail_url')}
+              <label className="block text-sm font-medium text-slate-300 mb-2">Audio URL (optional)</label>
+              <input
+                {...register('audio_url')}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
                 placeholder="https://..."
               />
-              {errors.thumbnail_url && <p className="text-red-500 text-xs mt-1">{errors.thumbnail_url.message}</p>}
             </div>
 
+            {/* Thumbnail */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Duration (Seconds)</label>
-              <input 
+              <label className="block text-sm font-medium text-slate-300 mb-2">Thumbnail URL</label>
+              <input
+                {...register('thumbnail_url')}
+                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="Auto-filled for YouTube"
+              />
+            </div>
+
+            {/* Duration */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Duration (seconds)</label>
+              <input
                 type="number"
                 {...register('duration')}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
-                placeholder="e.g. 2400"
+                placeholder="e.g. 2400 for 40 mins"
               />
-              {errors.duration && <p className="text-red-500 text-xs mt-1">{errors.duration.message}</p>}
             </div>
           </div>
 
-          <div className="flex gap-4 pt-4">
-            <button 
+          <div className="flex gap-4 pt-2">
+            <button
               type="button"
               onClick={onCancel}
               className="flex-1 px-6 py-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
             >
               Cancel
             </button>
-            <button 
+            <button
               type="submit"
               disabled={loading}
               className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"

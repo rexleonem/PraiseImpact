@@ -2,8 +2,19 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ScrollView } from 'react-native';
 import { Send, UserCircle2, Clock, CheckCircle2, Heart } from 'lucide-react-native';
 import axios from 'axios';
+import { auth } from '../../config/firebase';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
+
+const getAuthToken = async (): Promise<string> => {
+  try {
+    const user = auth.currentUser;
+    if (!user) return '';
+    return await user.getIdToken();
+  } catch {
+    return '';
+  }
+};
 
 export default function PrayerScreen() {
   const [message, setMessage] = useState('');
@@ -18,8 +29,8 @@ export default function PrayerScreen() {
   const fetchMyPrayers = async () => {
     setFetching(true);
     try {
-      // In a real app, you'd get the token from storage
-      const token = ''; 
+      const token = await getAuthToken();
+      if (!token) { setFetching(false); return; } // Not logged in
       const res = await axios.get(`${API_URL}/prayers/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -30,6 +41,7 @@ export default function PrayerScreen() {
       setFetching(false);
     }
   };
+
   const handleSubmit = async () => {
     if (!message.trim()) {
       Alert.alert('Error', 'Please enter a prayer request');
@@ -38,18 +50,21 @@ export default function PrayerScreen() {
 
     setLoading(true);
     try {
-      const token = ''; // Get from storage
-      await axios.post(`${API_URL}/prayers`, {
-        content: message,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      Alert.alert('Success', 'Your prayer request has been submitted.');
+      if (isAnonymous) {
+        // Anonymous route — no auth required
+        await axios.post(`${API_URL}/prayers/anonymous`, { message });
+      } else {
+        const token = await getAuthToken();
+        await axios.post(`${API_URL}/prayers`, { message }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      Alert.alert('🙏 Prayer Submitted', 'Your prayer request has been received. We are standing with you.');
       setMessage('');
-      fetchMyPrayers();
+      if (!isAnonymous) fetchMyPrayers();
     } catch (err) {
       console.log('Submit error', err);
-      Alert.alert('Error', 'Failed to submit prayer request.');
+      Alert.alert('Error', 'Failed to submit prayer request. Please try again.');
     } finally {
       setLoading(false);
     }

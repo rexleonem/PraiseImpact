@@ -8,7 +8,9 @@ const router = Router();
 
 router.get('/', liveController.getStatus);
 
-// Admin only
-router.put('/', protect, restrictTo('ADMIN'), validate(updateLiveSchema), liveController.updateStatus);
+// Admin only — support both PATCH and PUT for compatibility
+const adminMiddleware = [protect, restrictTo('ADMIN'), validate(updateLiveSchema), liveController.updateStatus];
+router.patch('/', ...adminMiddleware);
+router.put('/', ...adminMiddleware);
 
 export default router;

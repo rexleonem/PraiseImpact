@@ -20,10 +20,28 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
+export const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const event = await eventService.updateEvent(req.params.id as string, req.body);
+    res.json(event);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const remove = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await eventService.deleteEvent(req.params.id as string);
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const rsvp = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const rsvp = await eventService.rsvpEvent(req.user!.userId, req.params.id as string);
-    res.status(201).json(rsvp);
+    const result = await eventService.rsvpEvent(req.user!.userId, req.params.id as string);
+    res.status(201).json(result);
   } catch (error) {
     next(error);
   }

@@ -5,7 +5,7 @@ export const createEvent = async (data: any) => {
   const event = await prisma.event.create({ data });
   
   await notifyAllUsers(
-    "🎉 New Event: " + event.title,
+    '🎉 New Event: ' + event.title,
     `Join us on ${new Date(event.event_date).toLocaleDateString()}. Tap to view details.`,
     { type: 'event', id: event.id }
   );
@@ -18,6 +18,14 @@ export const getEvents = async () => {
     orderBy: { event_date: 'asc' },
     include: { _count: { select: { rsvps: true } } },
   });
+};
+
+export const updateEvent = async (id: string, data: any) => {
+  return prisma.event.update({ where: { id }, data });
+};
+
+export const deleteEvent = async (id: string) => {
+  return prisma.event.delete({ where: { id } });
 };
 
 export const rsvpEvent = async (userId: string, eventId: string) => {

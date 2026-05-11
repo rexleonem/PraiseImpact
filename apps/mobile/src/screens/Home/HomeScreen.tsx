@@ -21,6 +21,8 @@ export default function HomeScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchLiveStatus, 60000);
@@ -30,6 +32,22 @@ export default function HomeScreen() {
       duration: 1000,
       useNativeDriver: true,
     }).start();
+
+    // Pulse animation for live badge
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
 
     return () => clearInterval(interval);
   }, []);
@@ -166,8 +184,8 @@ export default function HomeScreen() {
                   />
                   <View style={styles.liveContent}>
                     <View style={styles.liveBadge}>
-                      <View style={styles.pulseDot} />
-                      <Text style={styles.liveLabel}>LIVE</Text>
+                      <Animated.View style={[styles.pulseDot, { opacity: pulseAnim }]} />
+                      <Text style={styles.liveLabel}>LIVE NOW</Text>
                     </View>
                     <Text style={styles.liveTitle}>Join our Live Worship Experience</Text>
                     <View style={styles.liveFooter}>

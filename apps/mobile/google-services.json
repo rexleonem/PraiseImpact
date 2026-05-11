@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1088804170185-s0r7fosuli56lq42211qae2e1l15dnco.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.praiseimpact.app",
+            "certificate_hash": "837c0e7d517c3f0ca82ffa48b6c828915fc5c21f"
+          }
+        },
+        {
           "client_id": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -19,14 +19,14 @@ export default function TabNavigator() {
   const insets = useSafeAreaInsets();
   
   const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 30 : 12);
-  const barHeight = Platform.OS === 'ios' ? 88 : 48 + 12 + bottomPadding;
+  const barHeight = Platform.OS === 'ios' ? 92 : 72;
 
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: {
           backgroundColor: '#0f172a',
-          borderTopColor: 'rgba(255,255,255,0.1)',
+          borderTopColor: 'rgba(255,255,255,0.05)',
           height: barHeight,
           paddingBottom: bottomPadding,
           paddingTop: 12,
@@ -34,11 +34,13 @@ export default function TabNavigator() {
           borderTopWidth: 1,
         },
         tabBarActiveTintColor: '#818cf8',
-        tabBarInactiveTintColor: '#64748b',
+        tabBarInactiveTintColor: '#475569',
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
-          marginTop: 4,
+          fontSize: 10,
+          fontWeight: '800',
+          marginTop: 2,
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
         },
         headerShown: false,
       }}
@@ -49,7 +51,7 @@ export default function TabNavigator() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.activeIconBg]}>
-              <Home color={color} size={22} strokeWidth={focused ? 2.5 : 2} />
+              <Home color={color} size={20} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
           tabBarLabel: 'Home'
@@ -61,7 +63,7 @@ export default function TabNavigator() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.activeIconBg]}>
-              <Play color={color} size={22} strokeWidth={focused ? 2.5 : 2} fill={focused ? color : 'transparent'} />
+              <Play color={color} size={20} strokeWidth={focused ? 2.5 : 2} fill={focused ? color : 'transparent'} />
             </View>
           ),
           tabBarLabel: 'Watch'
@@ -73,10 +75,10 @@ export default function TabNavigator() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.activeIconBg]}>
-              <MessageSquare color={color} size={22} strokeWidth={focused ? 2.5 : 2} />
+              <MessageSquare color={color} size={20} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
-          tabBarLabel: 'Community'
+          tabBarLabel: 'Family'
         }}
       />
       <Tab.Screen 
@@ -85,7 +87,7 @@ export default function TabNavigator() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.activeIconBg]}>
-              <Calendar color={color} size={22} strokeWidth={focused ? 2.5 : 2} />
+              <Calendar color={color} size={20} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
           tabBarLabel: 'Events'
@@ -97,7 +99,7 @@ export default function TabNavigator() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.activeIconBg]}>
-              <User color={color} size={22} strokeWidth={focused ? 2.5 : 2} />
+              <User color={color} size={20} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
           tabBarLabel: 'Profile'
@@ -109,13 +111,13 @@ export default function TabNavigator() {
 
 const styles = StyleSheet.create({
   iconContainer: {
-    width: 44,
+    width: 40,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   activeIconBg: {
-    backgroundColor: 'rgba(129, 140, 248, 0.15)',
+    backgroundColor: 'rgba(129, 140, 248, 0.12)',
   }
 });

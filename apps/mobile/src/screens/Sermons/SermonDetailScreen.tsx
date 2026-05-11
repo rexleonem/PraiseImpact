@@ -1,16 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, ActivityIndicator, Dimensions } from 'react-native';
 import axios from 'axios';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import YoutubeIframe from 'react-native-youtube-iframe';
-import { Download, Share2, PlayCircle, Headphones, Trash2, CheckCircle2 } from 'lucide-react-native';
+import { Download, Share2, PlayCircle, Headphones, Trash2, CheckCircle2, ChevronLeft, Bookmark, MessageCircle } from 'lucide-react-native';
 import { savePlaybackPosition, getPlaybackPosition } from '../../utils/storage';
 import { downloadSermonAudio, getLocalUri, deleteDownload } from '../../utils/downloads';
 import { trackEvent } from '../../utils/analytics';
+import { LinearGradient } from 'expo-linear-gradient';
 
+const { width } = Dimensions.get('window');
 const API_URL = 'https://praiseimpact.vercel.app';
 
-export default function SermonDetailScreen({ route }: any) {
+export default function SermonDetailScreen({ route, navigation }: any) {
   const { sermon: initialSermon, sermonId } = route.params || {};
   const [sermon, setSermon] = useState<any>(initialSermon);
   const [loading, setLoading] = useState(!initialSermon && !!sermonId);
@@ -18,7 +20,6 @@ export default function SermonDetailScreen({ route }: any) {
   const [downloading, setDownloading] = useState(false);
   const [localUri, setLocalUri] = useState<string | null>(null);
 
-  // Initialize expo-video player
   const player = useVideoPlayer(localUri || sermon?.video_url || '', (player) => {
     player.loop = false;
     player.play();
@@ -29,30 +30,23 @@ export default function SermonDetailScreen({ route }: any) {
       fetchSermon(sermonId);
     }
     checkDownloadStatus();
-    
-    if (sermon?.id) {
-       trackEvent('view_sermon', sermon.id);
-    }
+    if (sermon?.id) trackEvent('view_sermon', sermon.id);
   }, [sermonId]);
 
   useEffect(() => {
     if (sermon?.id) {
       getPlaybackPosition(sermon.id).then(lastPos => {
-        if (lastPos > 0) {
-          player.currentTime = lastPos;
-        }
+        if (lastPos > 0) player.currentTime = lastPos;
       });
     }
   }, [sermon, player]);
 
-  // Track playback position
   useEffect(() => {
     const interval = setInterval(() => {
       if (player.playing && sermon?.id) {
         savePlaybackPosition(sermon.id, Math.floor(player.currentTime));
       }
     }, 5000);
-
     return () => clearInterval(interval);
   }, [player, sermon]);
 
@@ -69,7 +63,7 @@ export default function SermonDetailScreen({ route }: any) {
     try {
       const uri = await downloadSermonAudio(sermon.id, sermon.audio_url);
       setLocalUri(uri);
-      Alert.alert('Success', 'Sermon audio downloaded for offline listening.');
+      Alert.alert('Success', 'Message downloaded for offline listening.');
     } catch (err) {
       Alert.alert('Error', 'Download failed.');
     } finally {
@@ -89,16 +83,10 @@ export default function SermonDetailScreen({ route }: any) {
       setSermon(res.data);
     } catch (err) {
       console.error('Error fetching sermon', err);
-      Alert.alert('Error', 'Could not load sermon details');
+      Alert.alert('Error', 'Could not load message details');
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDuration = (seconds: number | undefined) => {
-    if (!seconds) return '0 mins';
-    const mins = Math.floor(seconds / 60);
-    return `${mins} mins`;
   };
 
   if (loading) {
@@ -112,91 +100,89 @@ export default function SermonDetailScreen({ route }: any) {
   if (!sermon) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: '#fff' }}>Sermon not found</Text>
+        <Text style={{ color: '#fff' }}>Message not found</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.playerContainer}>
+    <View style={styles.container}>
+      <View style={styles.playerArea}>
         {sermon.source_type === 'YOUTUBE' && !audioOnly ? (
-          Platform.OS === 'web' ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${sermon.video_url}?autoplay=1&modestbranding=1`}
-              style={{ width: '100%', height: 220, border: 'none' }}
-              allow="autoplay; fullscreen"
-              allowFullScreen
-            />
-          ) : (
-            <YoutubeIframe
-              height={220}
-              play={player.playing}
-              videoId={sermon.video_url}
-            />
-          )
-        ) : (sermon.source_type === 'CLOUDINARY' || audioOnly) ? (
-           <View style={styles.nativePlayerWrapper}>
-            <VideoView
-              style={styles.nativePlayer}
-              player={player}
-              allowsFullscreen
-              allowsPictureInPicture
-            />
+          <YoutubeIframe height={240} play={player.playing} videoId={sermon.video_url} />
+        ) : (
+          <View style={styles.nativePlayerWrapper}>
+            <VideoView style={styles.nativePlayer} player={player} allowsFullscreen allowsPictureInPicture />
           </View>
-        ) : null}
+        )}
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <ChevronLeft color="#fff" size={24} />
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.detailsContainer}>
-        <View style={styles.titleRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{sermon.title}</Text>
-            <Text style={styles.speaker}>{sermon.speaker || 'Pastor'} • {formatDuration(sermon.duration)}</Text>
+      <ScrollView style={styles.contentArea} showsVerticalScrollIndicator={false}>
+        <View style={styles.mainInfo}>
+          <View style={styles.seriesLabel}>
+            <Text style={styles.seriesText}>{sermon.series || 'Spiritual Growth'}</Text>
+          </View>
+          <Text style={styles.title}>{sermon.title}</Text>
+          <View style={styles.metaRow}>
+            <Text style={styles.speakerText}>{sermon.speaker || 'Pastor Praise'}</Text>
+            <View style={styles.dot} />
+            <Text style={styles.durationText}>{Math.floor((sermon.duration || 0)/60)} mins</Text>
           </View>
         </View>
 
-        <View style={styles.actionsRow}>
+        <View style={styles.actionsPill}>
           <TouchableOpacity 
-            style={[styles.actionButton, audioOnly && styles.actionButtonActive]}
+            style={[styles.pillBtn, audioOnly && styles.pillBtnActive]} 
             onPress={() => setAudioOnly(!audioOnly)}
           >
             <Headphones color={audioOnly ? '#fff' : '#94a3b8'} size={20} />
-            <Text style={[styles.actionText, audioOnly && styles.actionTextActive]}>Audio</Text>
+            <Text style={[styles.pillText, audioOnly && styles.pillTextActive]}>Audio Only</Text>
           </TouchableOpacity>
+          
+          <View style={styles.pillDivider} />
+          
           {localUri ? (
-            <TouchableOpacity style={styles.actionButton} onPress={handleDeleteDownload}>
+            <TouchableOpacity style={styles.pillBtn} onPress={handleDeleteDownload}>
               <Trash2 color="#ef4444" size={20} />
-              <Text style={[styles.actionText, { color: '#ef4444' }]}>Remove</Text>
+              <Text style={[styles.pillText, { color: '#ef4444' }]}>Remove</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity 
-              style={styles.actionButton} 
+              style={styles.pillBtn} 
               onPress={handleDownload}
               disabled={downloading || !sermon.audio_url}
             >
-              <Download color={downloading ? '#4f46e5' : "#94a3b8"} size={20} />
-              <Text style={styles.actionText}>{downloading ? 'Downloading...' : 'Download'}</Text>
+              <Download color={downloading ? '#6366f1' : '#94a3b8'} size={20} />
+              <Text style={styles.pillText}>{downloading ? 'Saving...' : 'Offline'}</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.actionButton}>
+
+          <View style={styles.pillDivider} />
+
+          <TouchableOpacity style={styles.pillBtn}>
             <Share2 color="#94a3b8" size={20} />
-            <Text style={styles.actionText}>Share</Text>
+            <Text style={styles.pillText}>Share</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Series</Text>
-          <View style={styles.seriesTag}>
-            <Text style={styles.seriesText}>{sermon.series || 'Stand-alone Message'}</Text>
-          </View>
+        <View style={styles.descriptionSection}>
+          <Text style={styles.sectionHeading}>About this message</Text>
+          <Text style={styles.descriptionText}>{sermon.description}</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{sermon.description}</Text>
+        <View style={styles.communitySection}>
+          <TouchableOpacity style={styles.communityBtn}>
+            <MessageCircle color="#818cf8" size={20} />
+            <Text style={styles.communityBtnText}>Join the Conversation</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+        
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </View>
   );
 }
 
@@ -205,93 +191,143 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0f172a',
   },
-  playerContainer: {
+  playerArea: {
     width: '100%',
+    height: 240,
     backgroundColor: '#000',
-    minHeight: 220,
   },
   nativePlayerWrapper: {
-    height: 220,
     width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 240,
   },
   nativePlayer: {
     width: '100%',
     height: '100%',
   },
-  detailsContainer: {
+  backBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentArea: {
+    flex: 1,
     padding: 24,
   },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 24,
-  },
-  title: {
-    color: '#f8fafc',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  speaker: {
-    color: '#94a3b8',
-    fontSize: 16,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 16,
+  mainInfo: {
     marginBottom: 32,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    paddingVertical: 16,
   },
-  actionButton: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  actionButtonActive: {
-    backgroundColor: 'rgba(99,102,241,0.1)',
-  },
-  actionText: {
-    color: '#94a3b8',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  actionTextActive: {
-    color: '#fff',
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    color: '#f8fafc',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  seriesTag: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(99,102,241,0.1)',
+  seriesLabel: {
+    backgroundColor: 'rgba(99, 102, 241, 0.12)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.2)',
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
   },
   seriesText: {
     color: '#818cf8',
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+    lineHeight: 36,
+    marginBottom: 12,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  speakerText: {
+    color: '#94a3b8',
+    fontSize: 16,
     fontWeight: '600',
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#334155',
+  },
+  durationText: {
+    color: '#64748b',
     fontSize: 14,
   },
-  description: {
+  actionsPill: {
+    flexDirection: 'row',
+    backgroundColor: '#1e293b',
+    borderRadius: 24,
+    padding: 6,
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+  pillBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  pillBtnActive: {
+    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+  },
+  pillText: {
     color: '#94a3b8',
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  pillTextActive: {
+    color: '#fff',
+  },
+  pillDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  descriptionSection: {
+    marginBottom: 40,
+  },
+  sectionHeading: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  descriptionText: {
+    color: '#94a3b8',
+    fontSize: 16,
+    lineHeight: 26,
+  },
+  communitySection: {
+    paddingBottom: 40,
+  },
+  communityBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(129, 140, 248, 0.08)',
+    paddingVertical: 18,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 140, 248, 0.15)',
+  },
+  communityBtnText: {
+    color: '#818cf8',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });

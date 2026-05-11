@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, RefreshControl, Dimensions } from 'react-native';
-import { Radio, Play, Calendar, MessageSquare, Bell, ArrowRight, Heart, Users, Share2, Bookmark } from 'lucide-react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, RefreshControl, Dimensions, Animated } from 'react-native';
+import { Play, Calendar, Bell, ArrowRight, Heart, Users, Bookmark, Search, Headphones, BookOpen } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { getCachedData } from '../../utils/storage';
@@ -17,10 +17,20 @@ export default function HomeScreen() {
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchLiveStatus, 60000);
+    
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+
     return () => clearInterval(interval);
   }, []);
 
@@ -73,8 +83,11 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const featuredSermon = recentSermons[0];
-  const otherSermons = recentSermons.slice(1);
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   if (loading && !refreshing) {
     return (
@@ -84,14 +97,17 @@ export default function HomeScreen() {
            <Skeleton width={32} height={32} borderRadius={16} />
         </View>
         <View style={{ padding: 20 }}>
-          <Skeleton width="100%" height={180} borderRadius={24} />
-          <View style={{ marginTop: 24 }}>
-            <Skeleton width="100%" height={80} borderRadius={20} />
+          <Skeleton width="100%" height={240} borderRadius={32} />
+          <View style={{ marginTop: 32, flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Skeleton width="45%" height={80} borderRadius={20} />
+            <Skeleton width="45%" height={80} borderRadius={20} />
           </View>
-          <View style={{ marginTop: 24, flexDirection: 'row', gap: 12 }}>
-            <Skeleton width={(width - 52) / 3} height={100} borderRadius={16} />
-            <Skeleton width={(width - 52) / 3} height={100} borderRadius={16} />
-            <Skeleton width={(width - 52) / 3} height={100} borderRadius={16} />
+          <View style={{ marginTop: 32 }}>
+            <Skeleton width={150} height={24} />
+            <View style={{ marginTop: 16, flexDirection: 'row', gap: 16 }}>
+              <Skeleton width={220} height={140} borderRadius={24} />
+              <Skeleton width={100} height={140} borderRadius={24} />
+            </View>
           </View>
         </View>
       </View>
@@ -99,276 +115,287 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#818cf8" />
-      }
-    >
-      {/* --- ZONE 1: SPIRITUAL PULSE --- */}
-      <LinearGradient
-        colors={['rgba(99, 102, 241, 0.15)', 'transparent']}
-        style={styles.topGradient}
-      >
-        <View style={styles.header}>
-          <View style={styles.brandContainer}>
-            <Text style={styles.brandName}>Praise Impact</Text>
-            <Text style={styles.brandSub}>Faith & Community</Text>
-          </View>
-          <TouchableOpacity style={styles.notifIcon}>
-            <Bell color="#f8fafc" size={20} />
-            <View style={styles.notifDot} />
-          </TouchableOpacity>
-        </View>
+    <View style={styles.container}>
+      {/* --- FLOATING PREMIUM HEADER --- */}
+      <Animated.View style={[styles.floatingHeader, { opacity: headerOpacity }]}>
+        <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
+        <Text style={styles.floatingTitle}>Praise Impact</Text>
+      </Animated.View>
 
-        <View style={styles.pulseContainer}>
-          {liveStatus?.is_live ? (
-            <TouchableOpacity 
-              style={styles.liveCardActive}
-              activeOpacity={0.9}
-              onPress={() => navigation.navigate('LivePlayer', { videoId: liveStatus.video_id })}
-            >
-              <View style={styles.liveHeader}>
-                <View style={styles.liveBadge}>
-                  <View style={styles.pulseDot} />
-                  <Text style={styles.liveLabel}>LIVE NOW</Text>
+      <Animated.ScrollView 
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#818cf8" />
+        }
+      >
+        <Animated.View style={{ opacity: fadeAnim }}>
+          {/* --- HERO SECTION: SPIRITUAL PULSE --- */}
+          <View style={styles.heroSection}>
+            <View style={styles.header}>
+              <View>
+                <Text style={styles.welcomeText}>Welcome home,</Text>
+                <Text style={styles.brandName}>Praise Impact</Text>
+              </View>
+              <TouchableOpacity style={styles.avatarBtn}>
+                <Image 
+                  source={{ uri: 'https://api.dicebear.com/7.x/avataaars/svg?seed=praise' }} 
+                  style={styles.avatar} 
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.pulseContainer}>
+              {liveStatus?.is_live ? (
+                <TouchableOpacity 
+                  style={styles.liveHero}
+                  activeOpacity={0.95}
+                  onPress={() => navigation.navigate('LivePlayer', { videoId: liveStatus.video_id })}
+                >
+                  <Image 
+                    source={{ uri: recentSermons[0]?.thumbnail_url || 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?q=80&w=1470' }} 
+                    style={StyleSheet.absoluteFill} 
+                  />
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0.2)', 'rgba(79, 70, 229, 0.9)']}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.liveContent}>
+                    <View style={styles.liveBadge}>
+                      <View style={styles.pulseDot} />
+                      <Text style={styles.liveLabel}>LIVE</Text>
+                    </View>
+                    <Text style={styles.liveTitle}>Join our Live Worship Experience</Text>
+                    <View style={styles.liveFooter}>
+                      <View style={styles.viewerPill}>
+                        <Users color="#fff" size={12} />
+                        <Text style={styles.viewerText}>240 Watching</Text>
+                      </View>
+                      <View style={styles.playBtnCircle}>
+                        <Play color="#6366f1" size={20} fill="#6366f1" />
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.nextServiceHero}>
+                  <Image 
+                    source={{ uri: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=1473&auto=format&fit=crop' }} 
+                    style={StyleSheet.absoluteFill} 
+                  />
+                  <LinearGradient
+                    colors={['rgba(15, 23, 42, 0.4)', 'rgba(15, 23, 42, 0.95)']}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.nextServiceContent}>
+                    <Text style={styles.nextLabel}>NEXT SERVICE</Text>
+                    <Text style={styles.nextTime}>Sunday morning • 9:00 AM</Text>
+                    <View style={styles.countdownRow}>
+                      <View style={styles.timePill}>
+                        <Text style={styles.timeValue}>02</Text>
+                        <Text style={styles.timeUnit}>DAYS</Text>
+                      </View>
+                      <View style={styles.timeDivider} />
+                      <View style={styles.timePill}>
+                        <Text style={styles.timeValue}>14</Text>
+                        <Text style={styles.timeUnit}>HRS</Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
-                <Users color="rgba(255,255,255,0.7)" size={14} />
+              )}
+            </View>
+          </View>
+
+          {/* --- QUICK LINKS --- */}
+          <View style={styles.quickLinks}>
+            <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('Watch')}>
+              <View style={[styles.linkIcon, { backgroundColor: '#818cf820' }]}>
+                <Headphones color="#818cf8" size={24} />
               </View>
-              <Text style={styles.liveTitle}>Sunday Worship Experience</Text>
-              <View style={styles.joinLiveBtn}>
-                <Play color="#6366f1" size={16} fill="#6366f1" />
-                <Text style={styles.joinLiveText}>Join Service</Text>
-              </View>
+              <Text style={styles.linkLabel}>Sermons</Text>
             </TouchableOpacity>
-          ) : (
-            <View style={styles.nextServiceHero}>
+            <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('Community')}>
+              <View style={[styles.linkIcon, { backgroundColor: '#f43f5e20' }]}>
+                <Heart color="#f43f5e" size={24} fill="#f43f5e" />
+              </View>
+              <Text style={styles.linkLabel}>Prayers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('Events')}>
+              <View style={[styles.linkIcon, { backgroundColor: '#10b98120' }]}>
+                <Calendar color="#10b981" size={24} />
+              </View>
+              <Text style={styles.linkLabel}>Events</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.linkCard}>
+              <View style={[styles.linkIcon, { backgroundColor: '#f59e0b20' }]}>
+                <BookOpen color="#f59e0b" size={24} />
+              </View>
+              <Text style={styles.linkLabel}>Bible</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* --- CONTENT ZONES --- */}
+          <View style={styles.contentSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Teachings</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Watch')}>
+                <Text style={styles.seeAll}>See All</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+              {recentSermons.map((sermon, idx) => (
+                <TouchableOpacity 
+                  key={sermon.id} 
+                  style={[styles.premiumMessageCard, idx === 0 && { marginLeft: 20 }]}
+                  activeOpacity={0.9}
+                  onPress={() => navigation.navigate('Watch', { screen: 'SermonDetail', params: { sermonId: sermon.id } })}
+                >
+                  <Image source={{ uri: sermon.thumbnail_url }} style={styles.messageImage} />
+                  <LinearGradient
+                    colors={['transparent', 'rgba(15, 23, 42, 0.9)']}
+                    style={styles.messageOverlay}
+                  >
+                    <View style={styles.messageContent}>
+                      <Text style={styles.messageTitle} numberOfLines={1}>{sermon.title}</Text>
+                      <View style={styles.messageFooter}>
+                        <Text style={styles.messageSpeaker}>{sermon.speaker || 'Pastor Praise'}</Text>
+                        <View style={styles.durationPill}>
+                          <Text style={styles.durationText}>{Math.floor((sermon.duration || 0)/60)}m</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.prayerBannerContainer}>
+            <TouchableOpacity 
+              style={styles.prayerBanner}
+              onPress={() => navigation.navigate('Community')}
+            >
               <LinearGradient
-                colors={['#4f46e5', '#6366f1']}
+                colors={['#1e293b', '#0f172a']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.nextServiceGradient}
+                style={styles.prayerBannerGradient}
               >
-                <View style={styles.nextServiceContent}>
-                  <View>
-                    <Text style={styles.nextServiceLabel}>NEXT SERVICE</Text>
-                    <Text style={styles.nextServiceTime}>Sunday • 9:00 AM</Text>
-                  </View>
-                  <View style={styles.countdownPill}>
-                    <Text style={styles.countdownText}>2d 4h left</Text>
-                  </View>
+                <View style={styles.prayerBannerText}>
+                  <Text style={styles.prayerTitle}>Need Spiritual Support?</Text>
+                  <Text style={styles.prayerSub}>Our prayer warriors are here for you 24/7.</Text>
+                </View>
+                <View style={styles.prayerAction}>
+                  <ArrowRight color="#fff" size={20} />
                 </View>
               </LinearGradient>
-            </View>
-          )}
-        </View>
-      </LinearGradient>
-
-      {/* --- ZONE 2: PRIMARY ACTIONS --- */}
-      <View style={styles.actionsZone}>
-        <TouchableOpacity 
-          style={styles.prayerHero}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('Community')}
-        >
-          <LinearGradient
-            colors={['#1e293b', '#0f172a']}
-            style={styles.prayerHeroContent}
-          >
-            <View style={styles.prayerTextContainer}>
-              <Text style={styles.prayerHeroTitle}>Need Prayer?</Text>
-              <Text style={styles.prayerHeroSub}>Our community is standing with you.</Text>
-              <View style={styles.prayerHeroBtn}>
-                <Text style={styles.prayerHeroBtnText}>Submit Request</Text>
-                <ArrowRight color="#818cf8" size={14} />
-              </View>
-            </View>
-            <View style={styles.prayerIconCircle}>
-              <Heart color="#ef4444" size={24} fill="#ef4444" />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-
-        <View style={styles.subActions}>
-          <TouchableOpacity style={styles.subActionCard} onPress={() => navigation.navigate('Watch')}>
-            <View style={[styles.subActionIcon, { backgroundColor: 'rgba(99, 102, 241, 0.1)' }]}>
-              <Play color="#818cf8" size={22} fill="#818cf8" />
-            </View>
-            <Text style={styles.subActionLabel}>Watch</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.subActionCard} onPress={() => navigation.navigate('Events')}>
-            <View style={[styles.subActionIcon, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
-              <Calendar color="#10b981" size={22} />
-            </View>
-            <Text style={styles.subActionLabel}>Events</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.subActionCard} onPress={() => navigation.navigate('Profile')}>
-            <View style={[styles.subActionIcon, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
-              <Bookmark color="#f59e0b" size={22} />
-            </View>
-            <Text style={styles.subActionLabel}>Saved</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* --- ZONE 3: ENGAGEMENT --- */}
-      
-      {/* Featured/Recent Messages */}
-      <View style={styles.engagementZone}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Messages</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Watch')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-
-        {recentSermons.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {recentSermons.map((sermon) => (
-              <TouchableOpacity 
-                key={sermon.id} 
-                style={styles.messageCard}
-                activeOpacity={0.9}
-                onPress={() => navigation.navigate('Watch', { screen: 'SermonDetail', params: { sermonId: sermon.id } })}
-              >
-                <Image source={{ uri: sermon.thumbnail_url }} style={styles.messageThumb} />
-                <LinearGradient
-                  colors={['transparent', 'rgba(0,0,0,0.8)']}
-                  style={styles.messageOverlay}
-                >
-                  <Text style={styles.messageTitle} numberOfLines={1}>{sermon.title}</Text>
-                  <Text style={styles.messageMeta}>{Math.floor((sermon.duration || 0)/60)} mins</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        ) : (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No messages available yet.</Text>
-            <TouchableOpacity style={styles.emptyBtn} onPress={() => fetchData()}>
-              <Text style={styles.emptyBtnText}>Refresh</Text>
             </TouchableOpacity>
           </View>
-        )}
 
-        {/* Community Updates/Events */}
-        <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-          <Text style={styles.sectionTitle}>Community Updates</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Events')}>
-            <Text style={styles.seeAll}>View Calendar</Text>
-          </TouchableOpacity>
-        </View>
-
-        {upcomingEvents.length > 0 ? (
-          <View style={styles.eventsList}>
-            {upcomingEvents.slice(0, 2).map((event) => (
-              <TouchableOpacity key={event.id} style={styles.eventItem} activeOpacity={0.7}>
-                <View style={styles.eventDateBox}>
-                  <Text style={styles.eventDay}>{new Date(event.event_date).getDate()}</Text>
-                  <Text style={styles.eventMonth}>
-                    {new Date(event.event_date).toLocaleDateString(undefined, { month: 'short' }).toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.eventInfo}>
-                  <Text style={styles.eventTitle}>{event.title}</Text>
-                  <Text style={styles.eventMeta}>{event.location || 'Main Sanctuary'} • {new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                </View>
-                <ArrowRight color="#334155" size={16} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyCard}>
-            <Calendar color="#334155" size={40} style={{ marginBottom: 12 }} />
-            <Text style={styles.emptyText}>Stay tuned for upcoming events!</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={{ height: 100 }} />
-    </ScrollView>
+          <View style={styles.spacer} />
+        </Animated.View>
+      </Animated.ScrollView>
+    </View>
   );
 }
+
+// Simple BlurView Mock for consistency
+const BlurView = ({ style, intensity, tint }: any) => (
+  <View style={[style, { backgroundColor: tint === 'dark' ? `rgba(15, 23, 42, ${intensity/100})` : `rgba(255,255,255, ${intensity/100})` }]} />
+);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0f172a',
   },
-  topGradient: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 30,
-    paddingBottom: 24,
+  floatingHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === 'ios' ? 100 : 70,
+    zIndex: 10,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 12,
+  },
+  floatingTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+  },
+  heroSection: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 20,
   },
   header: {
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  brandContainer: {
-    gap: 2,
+  welcomeText: {
+    color: '#64748b',
+    fontSize: 14,
+    fontWeight: '600',
   },
   brandName: {
-    color: '#f8fafc',
-    fontSize: 22,
+    color: '#fff',
+    fontSize: 26,
     fontWeight: '900',
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
-  brandSub: {
-    color: '#818cf8',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  notifIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notifDot: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ef4444',
+  avatarBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 2,
-    borderColor: '#1e293b',
+    borderColor: '#334155',
+    overflow: 'hidden',
+    backgroundColor: '#1e293b',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
   },
   pulseContainer: {
     paddingHorizontal: 20,
   },
-  liveCardActive: {
-    backgroundColor: '#ef4444',
-    padding: 24,
-    borderRadius: 28,
-    shadowColor: '#ef4444',
-    shadowOffset: { width: 0, height: 10 },
+  liveHero: {
+    height: 240,
+    borderRadius: 32,
+    overflow: 'hidden',
+    shadowColor: '#6366f1',
+    shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.4,
-    shadowRadius: 15,
-    elevation: 10,
+    shadowRadius: 16,
+    elevation: 12,
   },
-  liveHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+  liveContent: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'flex-end',
   },
   liveBadge: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
   pulseDot: {
     width: 6,
@@ -380,162 +407,123 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 0.5,
   },
   liveTitle: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  joinLiveBtn: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 16,
-  },
-  joinLiveText: {
-    color: '#6366f1',
-    fontWeight: '900',
-    fontSize: 15,
-  },
-  nextServiceHero: {
-    borderRadius: 28,
-    overflow: 'hidden',
-    shadowColor: '#6366f1',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  nextServiceGradient: {
-    padding: 24,
-  },
-  nextServiceContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  nextServiceLabel: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  nextServiceTime: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  countdownPill: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 14,
-  },
-  countdownText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 13,
-  },
-  actionsZone: {
-    paddingHorizontal: 20,
-    marginTop: 8,
-  },
-  prayerHero: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  prayerHeroContent: {
-    flexDirection: 'row',
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  prayerTextContainer: {
-    flex: 1,
-  },
-  prayerHeroTitle: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  prayerHeroSub: {
-    color: '#94a3b8',
-    fontSize: 14,
     marginBottom: 16,
-    lineHeight: 20,
+    lineHeight: 34,
   },
-  prayerHeroBtn: {
+  liveFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  viewerPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
-  prayerHeroBtnText: {
-    color: '#818cf8',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  prayerIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 16,
-  },
-  subActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-    gap: 12,
-  },
-  subActionCard: {
-    flex: 1,
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 20,
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  subActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  subActionLabel: {
-    color: '#f8fafc',
-    fontSize: 13,
+  viewerText: {
+    color: '#fff',
+    fontSize: 12,
     fontWeight: '700',
   },
-  engagementZone: {
-    paddingHorizontal: 20,
+  playBtnCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextServiceHero: {
+    height: 200,
+    borderRadius: 32,
+    overflow: 'hidden',
+  },
+  nextServiceContent: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  nextLabel: {
+    color: '#818cf8',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  nextTime: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  countdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  timePill: {
+    alignItems: 'center',
+  },
+  timeValue: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  timeUnit: {
+    color: '#64748b',
+    fontSize: 10,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  timeDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#334155',
+  },
+  quickLinks: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
     marginTop: 32,
+  },
+  linkCard: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  linkIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  linkLabel: {
+    color: '#94a3b8',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  contentSection: {
+    marginTop: 40,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    paddingHorizontal: 24,
+    marginBottom: 20,
   },
   sectionTitle: {
-    color: '#f8fafc',
-    fontSize: 18,
+    color: '#fff',
+    fontSize: 20,
     fontWeight: 'bold',
   },
   seeAll: {
@@ -544,105 +532,100 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   horizontalScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
+    paddingBottom: 10,
   },
-  messageCard: {
-    width: 220,
-    height: 140,
-    borderRadius: 20,
+  premiumMessageCard: {
+    width: 260,
+    height: 160,
+    borderRadius: 28,
     overflow: 'hidden',
-    marginRight: 12,
+    marginRight: 16,
     backgroundColor: '#1e293b',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  messageThumb: {
+  messageImage: {
     width: '100%',
     height: '100%',
   },
   messageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    padding: 12,
+    padding: 16,
     justifyContent: 'flex-end',
+  },
+  messageContent: {
+    gap: 4,
   },
   messageTitle: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 'bold',
   },
-  messageMeta: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
-  },
-  eventsList: {
-    gap: 12,
-  },
-  eventItem: {
+  messageFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 20,
-    gap: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    justifyContent: 'space-between',
   },
-  eventDateBox: {
-    width: 50,
-    height: 50,
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+  messageSpeaker: {
+    color: '#94a3b8',
+    fontSize: 12,
+    fontWeight: '600',
   },
-  eventDay: {
-    color: '#818cf8',
-    fontSize: 18,
-    fontWeight: 'bold',
+  durationPill: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
-  eventMonth: {
-    color: '#818cf8',
+  durationText: {
+    color: '#fff',
     fontSize: 10,
     fontWeight: '800',
   },
-  eventInfo: {
+  prayerBannerContainer: {
+    paddingHorizontal: 20,
+    marginTop: 40,
+  },
+  prayerBanner: {
+    borderRadius: 32,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  prayerBannerGradient: {
+    flexDirection: 'row',
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  prayerBannerText: {
     flex: 1,
+    gap: 4,
   },
-  eventTitle: {
-    color: '#f8fafc',
-    fontSize: 16,
+  prayerTitle: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 4,
   },
-  eventMeta: {
-    color: '#64748b',
-    fontSize: 12,
+  prayerSub: {
+    color: '#94a3b8',
+    fontSize: 13,
   },
-  emptyCard: {
-    backgroundColor: '#1e293b',
-    padding: 32,
-    borderRadius: 24,
+  prayerAction: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#6366f1',
     alignItems: 'center',
     justifyContent: 'center',
-    borderStyle: 'dashed',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  emptyText: {
-    color: '#64748b',
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  emptyBtn: {
-    marginTop: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(129, 140, 248, 0.15)',
-    borderRadius: 12,
-  },
-  emptyBtnText: {
-    color: '#818cf8',
-    fontWeight: 'bold',
-    fontSize: 14,
+  spacer: {
+    height: 120,
   }
 });

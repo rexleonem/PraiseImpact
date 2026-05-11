@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Calendar, MapPin, Check } from 'lucide-react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Animated, Platform } from 'react-native';
+import { Calendar, MapPin, Check, ChevronRight, Clock } from 'lucide-react-native';
 import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
 
@@ -9,18 +11,25 @@ export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [myRsvps, setMyRsvps] = useState<string[]>([]);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     fetchData();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = ''; // Get from storage
+      const token = await AsyncStorage.getItem('token');
       const [eventsRes, myEventsRes] = await Promise.all([
         axios.get(`${API_URL}/events`),
-        axios.get(`${API_URL}/events/me`, { headers: { Authorization: `Bearer ${token}` } })
+        token ? axios.get(`${API_URL}/events/me`, { headers: { Authorization: `Bearer ${token}` } }) : Promise.resolve({ data: [] })
       ]);
       setEvents(eventsRes.data);
       setMyRsvps(myEventsRes.data.map((e: any) => e.id));
@@ -33,7 +42,11 @@ export default function EventsScreen() {
 
   const handleRSVP = async (eventId: string) => {
     try {
-      const token = ''; // Get from storage
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        alert('Please login to RSVP');
+        return;
+      }
       await axios.post(`${API_URL}/events/${eventId}/rsvp`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -43,58 +56,72 @@ export default function EventsScreen() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
-
-  const renderEvent = ({ item }: { item: any }) => (
-    <View style={styles.eventCard}>
-      <View style={styles.dateBox}>
-        <Text style={styles.dateDay}>{new Date(item.event_date).getDate()}</Text>
-        <Text style={styles.dateMonth}>{new Date(item.event_date).toLocaleString('default', { month: 'short' })}</Text>
-      </View>
-      <View style={styles.eventInfo}>
-        <Text style={styles.eventTitle}>{item.title}</Text>
-        <View style={styles.eventMeta}>
-          <View style={styles.metaRow}>
-            <Calendar color="#94a3b8" size={14} />
-            <Text style={styles.metaText}>{formatDate(item.event_date)}</Text>
+  const renderEvent = ({ item, index }: { item: any, index: number }) => (
+    <Animated.View style={[styles.eventCardContainer, { opacity: fadeAnim }]}>
+      <TouchableOpacity 
+        style={styles.eventCard}
+        activeOpacity={0.9}
+        onPress={() => !myRsvps.includes(item.id) && handleRSVP(item.id)}
+      >
+        <View style={styles.dateSide}>
+          <View style={styles.dateCircle}>
+            <Text style={styles.dateDay}>{new Date(item.event_date).getDate()}</Text>
+            <Text style={styles.dateMonth}>
+              {new Date(item.event_date).toLocaleString('default', { month: 'short' }).toUpperCase()}
+            </Text>
           </View>
-          {item.location && (
-            <View style={styles.metaRow}>
-              <MapPin color="#94a3b8" size={14} />
-              <Text style={styles.metaText}>{item.location}</Text>
-            </View>
-          )}
+          <View style={styles.dateLine} />
         </View>
-        <TouchableOpacity 
-          style={[styles.rsvpButton, myRsvps.includes(item.id) && styles.rsvpButtonActive]}
-          onPress={() => !myRsvps.includes(item.id) && handleRSVP(item.id)}
-          disabled={myRsvps.includes(item.id)}
-        >
-          {myRsvps.includes(item.id) && <Check color="#fff" size={14} style={{ marginRight: 4 }} />}
-          <Text style={[styles.rsvpText, myRsvps.includes(item.id) && styles.rsvpTextActive]}>
-            {myRsvps.includes(item.id) ? 'RSVP Confirmed' : 'I\'m Interested'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+
+        <View style={styles.contentSide}>
+          <Text style={styles.eventTitle}>{item.title}</Text>
+          <View style={styles.metaGroup}>
+            <View style={styles.metaItem}>
+              <Clock color="#64748b" size={14} />
+              <Text style={styles.metaText}>
+                {new Date(item.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+            </View>
+            <View style={styles.metaItem}>
+              <MapPin color="#64748b" size={14} />
+              <Text style={styles.metaText} numberOfLines={1}>{item.location || 'Main Sanctuary'}</Text>
+            </View>
+          </View>
+          
+          <View style={[styles.statusBadge, myRsvps.includes(item.id) && styles.statusBadgeActive]}>
+            {myRsvps.includes(item.id) ? (
+              <>
+                <Check color="#fff" size={12} strokeWidth={3} />
+                <Text style={styles.statusTextActive}>I'm attending</Text>
+              </>
+            ) : (
+              <Text style={styles.statusText}>Interested? Tap to RSVP</Text>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 
   return (
     <View style={styles.container}>
+      <LinearGradient colors={['#1e293b', '#0f172a']} style={styles.header}>
+        <Text style={styles.headerTitle}>Calendar</Text>
+        <Text style={styles.headerSub}>Upcoming Fellowship & Service</Text>
+      </LinearGradient>
+
       <FlatList
         data={events}
         keyExtractor={(item: any) => item.id}
         renderItem={renderEvent}
         contentContainerStyle={styles.listContent}
-        ListEmptyComponent={() => (
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => !loading ? (
           <View style={styles.emptyContainer}>
-            <Calendar color="#334155" size={48} />
-            <Text style={styles.emptyText}>No upcoming events</Text>
+            <Calendar color="#334155" size={60} strokeWidth={1} />
+            <Text style={styles.emptyText}>No upcoming events scheduled</Text>
           </View>
-        )}
+        ) : null}
       />
     </View>
   );
@@ -105,91 +132,140 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0f172a',
   },
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 70 : 40,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: -1,
+  },
+  headerSub: {
+    color: '#818cf8',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   listContent: {
-    padding: 16,
-    gap: 16,
+    padding: 24,
+    paddingTop: 32,
+    paddingBottom: 120,
+  },
+  eventCardContainer: {
+    marginBottom: 24,
   },
   eventCard: {
-    backgroundColor: '#1e293b',
-    borderRadius: 16,
-    padding: 16,
     flexDirection: 'row',
-    gap: 16,
+    backgroundColor: '#1e293b',
+    borderRadius: 32,
+    padding: 20,
+    gap: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.03)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  dateBox: {
-    backgroundColor: 'rgba(99,102,241,0.1)',
-    borderRadius: 12,
-    width: 60,
-    height: 60,
+  dateSide: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  dateCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#0f172a',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.2)',
+    borderWidth: 2,
+    borderColor: '#334155',
   },
   dateDay: {
-    color: '#818cf8',
-    fontSize: 24,
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '900',
   },
   dateMonth: {
     color: '#818cf8',
-    fontSize: 12,
-    textTransform: 'uppercase',
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '900',
   },
-  eventInfo: {
+  dateLine: {
     flex: 1,
+    width: 2,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 1,
+  },
+  contentSide: {
+    flex: 1,
+    justifyContent: 'center',
   },
   eventTitle: {
-    color: '#f8fafc',
-    fontSize: 18,
+    color: '#fff',
+    fontSize: 19,
     fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  eventMeta: {
-    gap: 6,
     marginBottom: 12,
+    lineHeight: 24,
   },
-  metaRow: {
+  metaGroup: {
+    gap: 8,
+    marginBottom: 16,
+  },
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   metaText: {
     color: '#94a3b8',
     fontSize: 14,
+    fontWeight: '500',
   },
-  rsvpButton: {
-    backgroundColor: '#334155',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  statusBadge: {
     alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  statusBadgeActive: {
+    backgroundColor: '#10b98120',
+    borderColor: '#10b98140',
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
-  rsvpButtonActive: {
-    backgroundColor: '#4f46e5',
+  statusText: {
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
   },
-  rsvpText: {
-    color: '#e2e8f0',
-    fontSize: 13,
-    fontWeight: 'bold',
-  },
-  rsvpTextActive: {
-    color: '#fff',
+  statusTextActive: {
+    color: '#10b981',
+    fontSize: 12,
+    fontWeight: '800',
   },
   emptyContainer: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 100,
+    marginTop: 60,
     gap: 16,
   },
   emptyText: {
-    color: '#94a3b8',
+    color: '#475569',
     fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   }
 });

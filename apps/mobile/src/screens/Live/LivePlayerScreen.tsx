@@ -4,8 +4,11 @@ import YoutubePlayer from "react-native-youtube-iframe";
 import { ChevronLeft, Share2, Users, Info, MessageSquare, ExternalLink } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { io } from 'socket.io-client';
 
 const { width } = Dimensions.get('window');
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://praiseimpact.vercel.app';
+const SOCKET_URL = API_URL.replace('/api', '').replace('https://', 'wss://').replace('http://', 'ws://');
 
 export default function LivePlayerScreen() {
   const navigation = useNavigation<any>();
@@ -14,7 +17,23 @@ export default function LivePlayerScreen() {
   
   const [playing, setPlaying] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [viewerCount, setViewerCount] = useState(0);
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const socketRef = useRef<any>(null);
+
+  // Socket for viewer count
+  useEffect(() => {
+    socketRef.current = io(SOCKET_URL);
+    socketRef.current.emit('join-live', videoId);
+    
+    socketRef.current.on('viewer-count', (count: number) => {
+      setViewerCount(count);
+    });
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+    };
+  }, [videoId]);
 
   // Pulsing animation for the Live indicator
   useEffect(() => {
@@ -105,7 +124,7 @@ export default function LivePlayerScreen() {
             <View style={styles.statsRow}>
               <View style={styles.statPill}>
                 <Users size={14} color="#818cf8" />
-                <Text style={styles.statText}>1,240 Watching</Text>
+                <Text style={styles.statText}>{viewerCount || 0} Watching</Text>
               </View>
               <View style={styles.statPill}>
                 <MessageSquare size={14} color="#818cf8" />

@@ -15,6 +15,11 @@ export const createEvent = async (data: any) => {
 
 export const getEvents = async () => {
   return prisma.event.findMany({
+    where: {
+      event_date: {
+        gte: new Date(),
+      },
+    },
     orderBy: { event_date: 'asc' },
     include: { _count: { select: { rsvps: true } } },
   });

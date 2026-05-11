@@ -47,13 +47,13 @@ router.get('/', protect, restrictTo('ADMIN'), async (req: AuthRequest, res, next
 // Update user role (admin only)
 router.patch('/:id/role', protect, restrictTo('ADMIN'), async (req: AuthRequest, res, next) => {
   try {
-    const { role } = req.body;
+    const role = String(req.body.role);
     if (!['ADMIN', 'USER'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
     const user = await prisma.user.update({
-      where: { id: req.params.id },
-      data: { role },
+      where: { id: String(req.params.id) },
+      data: { role: role as 'ADMIN' | 'USER' },
       select: { id: true, email: true, role: true },
     });
     res.json(user);

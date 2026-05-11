@@ -26,7 +26,7 @@
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "package": "com.praiseimpact.app",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"

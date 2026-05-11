@@ -55,7 +55,9 @@ function RootNavigator() {
 export default function App() {
   React.useEffect(() => {
     if (Platform.OS !== 'web') {
-      registerForPushNotificationsAsync();
+      registerForPushNotificationsAsync().catch(err => {
+        console.error('[Notifications] Failed to register:', err);
+      });
 
       const notificationListener = Notifications.addNotificationReceivedListener(() => {});
       const responseListener = Notifications.addNotificationResponseReceivedListener(response => {

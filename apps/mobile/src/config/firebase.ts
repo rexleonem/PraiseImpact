@@ -39,14 +39,16 @@ let auth: Auth;
 if (Platform.OS === 'web') {
   auth = getAuth(app);
 } else {
-  // For native, use initializeAuth with React Native persistence.
-  // getReactNativePersistence is imported from firebase/auth/react-native (correct path for v10+)
   try {
+    // For native, use initializeAuth with React Native persistence.
+    // getReactNativePersistence is correctly imported from firebase/auth for v10+
+    const persistence = getReactNativePersistence(AsyncStorage);
     auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
+      persistence,
     });
   } catch (e) {
-    // Auth already initialized (e.g., hot reload) — just get the existing instance
+    console.error('[Firebase] initializeAuth failed, falling back to getAuth:', e);
+    // Fallback to getAuth which might use in-memory persistence or fail gracefully
     auth = getAuth(app);
   }
 }

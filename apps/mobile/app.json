@@ -36,12 +36,7 @@
       "expo-video",
       "expo-audio",
       "expo-notifications",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": ""
-        }
-      ]
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "eas": {

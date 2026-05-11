@@ -1,0 +1,57 @@
+{
+  "cli": {
+    "version": ">= 10.0.0"
+  },
+  "build": {
+    "development": {
+      "node": "22.13.0",
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "node": "22.13.0",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyA2TNEc2Zun2vnmEUZUS1Cs4KwKjj_IbMM",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "praiseimpact-fed2b.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "praiseimpact-fed2b",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "praiseimpact-fed2b.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "1088804170185",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:1088804170185:android:e36ea780544bd460d8e018",
+        "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-9PPZVDV62L",
+        "EXPO_PUBLIC_API_URL": "https://praiseimpact.vercel.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com"
+      }
+    },
+    "production": {
+      "node": "22.13.0",
+      "distribution": "store",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyA2TNEc2Zun2vnmEUZUS1Cs4KwKjj_IbMM",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "praiseimpact-fed2b.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "praiseimpact-fed2b",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "praiseimpact-fed2b.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "1088804170185",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:1088804170185:android:e36ea780544bd460d8e018",
+        "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-9PPZVDV62L",
+        "EXPO_PUBLIC_API_URL": "https://praiseimpact.vercel.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com"
+      }
+    },
+    "production-apk": {
+      "extends": "production",
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -2,11 +2,9 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { 
   getAuth, 
   initializeAuth, 
-  // @ts-ignore
-  getReactNativePersistence, 
   Auth,
-  browserLocalPersistence
 } from 'firebase/auth';
+import { getReactNativePersistence } from 'firebase/auth/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -21,6 +19,14 @@ const firebaseConfig = {
   measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+// Guard against missing environment variables (common in misconfigured production builds)
+if (!firebaseConfig.apiKey || !firebaseConfig.appId) {
+  console.error(
+    '[Firebase] CRITICAL: Missing required environment variables. ' +
+    'Check EXPO_PUBLIC_FIREBASE_API_KEY and EXPO_PUBLIC_FIREBASE_APP_ID in eas.json.'
+  );
+}
+
 let app: FirebaseApp;
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
@@ -33,14 +39,14 @@ let auth: Auth;
 if (Platform.OS === 'web') {
   auth = getAuth(app);
 } else {
-  // For native, we MUST use initializeAuth to set persistence, 
-  // but we must also ensure we don't call it if already initialized.
+  // For native, use initializeAuth with React Native persistence.
+  // getReactNativePersistence is imported from firebase/auth/react-native (correct path for v10+)
   try {
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
   } catch (e) {
-    // If already initialized, just get the existing instance
+    // Auth already initialized (e.g., hot reload) — just get the existing instance
     auth = getAuth(app);
   }
 }

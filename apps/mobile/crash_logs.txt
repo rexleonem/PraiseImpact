@@ -1,0 +1,25 @@
+﻿--------- beginning of system
+05-11 21:20:29.948   643  1725 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+--------- beginning of crash
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: FATAL EXCEPTION: create_react_context
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: Process: com.praiseimpact.app, PID: 26829
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: java.lang.NoSuchMethodError: No virtual method getStaticAsyncFunctions()Ljava/util/Map; in class Lexpo/modules/kotlin/classcomponent/ClassComponentBuilder; or its super classes (declaration of 'expo.modules.kotlin.classcomponent.ClassComponentBuilder' appears in /data/app/~~3tECJmR1RBvaUlGmTjHlrA==/com.praiseimpact.app-sjjmcIsQigL6sIyjYOGfyA==/base.apk!classes4.dex)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.crypto.aes.AesCryptoModule.definition(AesCryptoModule.kt:404)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.kotlin.ModuleHolder.<init>(ModuleHolder.kt:22)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.kotlin.ModuleRegistry.register(ModuleRegistry.kt:27)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.kotlin.ModuleRegistry.register(ModuleRegistry.kt:47)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.kotlin.AppContext.<init>(AppContext.kt:120)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.kotlin.KotlinInteropModuleRegistry.<init>(KotlinInteropModuleRegistry.kt:23)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.adapters.react.NativeModulesProxy.<init>(NativeModulesProxy.java:45)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.adapters.react.ModuleRegistryAdapter.getOrCreateNativeModulesProxy(ModuleRegistryAdapter.java:135)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.adapters.react.ModuleRegistryAdapter.createNativeModules(ModuleRegistryAdapter.java:64)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at expo.modules.ExpoModulesPackage.createNativeModules(ExpoModulesPackage.kt:35)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactPackageHelper.getNativeModuleIterator(ReactPackageHelper.kt:32)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.NativeModuleRegistryBuilder.processPackage(NativeModuleRegistryBuilder.kt:43)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactInstanceManager.processPackage(ReactInstanceManager.java:1571)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactInstanceManager.processPackages(ReactInstanceManager.java:1542)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactInstanceManager.createReactContext(ReactInstanceManager.java:1453)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactInstanceManager.lambda$runCreateReactContextOnNewThread$2(ReactInstanceManager.java:1222)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactInstanceManager.$r8$lambda$PrBhihCbbAFk4ZReAALGanVLCyc(ReactInstanceManager.java:0)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at com.facebook.react.ReactInstanceManager$$ExternalSyntheticLambda1.run(D8$$SyntheticClass:0)
+05-11 21:20:30.453 26829 26858 E AndroidRuntime: 	at java.lang.Thread.run(Thread.java:1572)

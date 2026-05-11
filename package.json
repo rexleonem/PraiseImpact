@@ -8,8 +8,22 @@
     "dev:web": "yarn --cwd apps/web dev",
     "dev:api": "yarn --cwd services/api dev"
   },
-  "workspaces": [
-    "apps/*",
-    "services/*"
-  ]
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "services/*"
+    ],
+    "nohoist": [
+      "**/react-native",
+      "**/react-native/**",
+      "**/expo",
+      "**/expo/**",
+      "**/expo-modules-core",
+      "**/expo-modules-core/**",
+      "**/expo-crypto",
+      "**/expo-crypto/**",
+      "**/expo-video",
+      "**/expo-video/**"
+    ]
+  }
 }

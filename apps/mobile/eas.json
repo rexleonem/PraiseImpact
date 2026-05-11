@@ -23,7 +23,8 @@
         "EXPO_PUBLIC_FIREBASE_APP_ID": "1:1088804170185:android:e36ea780544bd460d8e018",
         "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-9PPZVDV62L",
         "EXPO_PUBLIC_API_URL": "https://praiseimpact.vercel.app",
-        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com",
+        "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
       }
     },
     "production": {
@@ -41,7 +42,8 @@
         "EXPO_PUBLIC_FIREBASE_APP_ID": "1:1088804170185:android:e36ea780544bd460d8e018",
         "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-9PPZVDV62L",
         "EXPO_PUBLIC_API_URL": "https://praiseimpact.vercel.app",
-        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1088804170185-nm1qikulo88jhvuor4pphpltc07fpj2g.apps.googleusercontent.com",
+        "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
       }
     },
     "production-apk": {

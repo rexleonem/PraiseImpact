@@ -4,9 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "prisma generate && rimraf dist && tsc",
-    "start": "node dist/index.js",
+    "dev": "node init && ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "node init && prisma generate && rimraf dist && tsc",
+    "start": "node init && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "prisma generate",
     "seed": "ts-node --transpile-only prisma/seed.ts"

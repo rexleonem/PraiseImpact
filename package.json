@@ -2,11 +2,11 @@
   "name": "praise-impact",
   "private": true,
   "scripts": {
-    "build:web": "yarn --cwd apps/web build",
-    "build:api": "yarn --cwd services/api build",
-    "build:mobile-web": "yarn --cwd apps/mobile build",
-    "dev:web": "yarn --cwd apps/web dev",
-    "dev:api": "yarn --cwd services/api dev"
+    "build:web": "node init && yarn --cwd apps/web build",
+    "build:api": "node init && yarn --cwd services/api build",
+    "build:mobile-web": "node init && yarn --cwd apps/mobile build",
+    "dev:web": "node init && yarn --cwd apps/web dev",
+    "dev:api": "node init && yarn --cwd services/api dev"
   },
   "resolutions": {
     "react-native": "0.81.5",

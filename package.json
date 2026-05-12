@@ -8,6 +8,11 @@
     "dev:web": "yarn --cwd apps/web dev",
     "dev:api": "yarn --cwd services/api dev"
   },
+  "resolutions": {
+    "react-native": "0.81.5",
+    "expo": "~55.0.0",
+    "react": "19.1.0"
+  },
   "workspaces": {
     "packages": [
       "apps/*",

@@ -758,10 +758,6 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@config-plugins/repo@expo/config-plugins":
-  version "1.0.0"
-  resolved "https://codeload.github.com/expo/config-plugins/tar.gz/a48bb42c194a25adf0c92be22534912b275379a2"
-
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz"
@@ -1281,6 +1277,11 @@
   version "55.0.4"
   resolved "https://registry.npmjs.org/@expo/schema-utils/-/schema-utils-55.0.4.tgz#2039daa04933da8f27957fd61b2b6d8d22d34bba"
   integrity sha512-65IdeeE8dAZR3n3J5Eq7LYiQ8BFGeEYCWPBCzycvafL7PkskbCyIclTQarRwf/HXFoRvezKCjaLwy/8v9Prk6g==
+
+"@expo/schema-utils@^56.0.0":
+  version "56.0.1"
+  resolved "https://registry.npmjs.org/@expo/schema-utils/-/schema-utils-56.0.1.tgz#44b993a64ed8dc0439e7571edf3d70b0f0b78bc4"
+  integrity sha512-CZ/+mYbQmWeOnkCGlWy9K+lFxbJSMFY7+TqBZcKzBSTU5Q7IGRvn/sOG3TdNjIdLPmbA8xe7R/c3UUQ28R9i9w==
 
 "@expo/sdk-runtime-versions@^1.0.0":
   version "1.0.0"
@@ -5310,6 +5311,15 @@ expo-av@~16.0.8:
   version "16.0.8"
   resolved "https://registry.npmjs.org/expo-av/-/expo-av-16.0.8.tgz"
   integrity sha512-cmVPftGR/ca7XBgs7R6ky36lF3OC0/MM/lpgX/yXqfv0jASTsh7AYX9JxHCwFmF+Z6JEB1vne9FDx4GiLcGreQ==
+
+expo-build-properties@~1.1.2:
+  version "56.0.6"
+  resolved "https://registry.npmjs.org/expo-build-properties/-/expo-build-properties-56.0.6.tgz#e0b6478d51bad715814fa893ada9d450fee1c609"
+  integrity sha512-I97hglSqFBDCSjaWKUWahb3lCmFIfogG8NW61VEOayGEQQ4Zw9UoXGZbQeo7vAYeeYTx+jfJfkbvJRxwr80eUw==
+  dependencies:
+    "@expo/schema-utils" "^56.0.0"
+    resolve-from "^5.0.0"
+    semver "^7.6.0"
 
 expo-constants@~18.0.13:
   version "18.0.13"

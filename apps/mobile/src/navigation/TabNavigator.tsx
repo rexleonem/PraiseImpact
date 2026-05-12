@@ -17,30 +17,48 @@ const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
   const insets = useSafeAreaInsets();
-  
-  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 30 : 12);
-  const barHeight = Platform.OS === 'ios' ? 92 : 72;
+
+  const bottomOffset = Platform.OS === 'android'
+    ? Math.max(insets.bottom, 28)
+    : Math.max(insets.bottom, 16);
+  const barHeight = 68;
 
   return (
     <Tab.Navigator
       screenOptions={{
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: '#0f172a',
-          borderTopColor: 'rgba(255,255,255,0.05)',
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: bottomOffset,
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
+          borderColor: 'rgba(148, 163, 184, 0.14)',
           height: barHeight,
-          paddingBottom: bottomPadding,
-          paddingTop: 12,
-          elevation: 0,
+          paddingBottom: 8,
+          paddingTop: 8,
+          paddingHorizontal: 8,
+          elevation: 18,
+          borderWidth: 1,
           borderTopWidth: 1,
+          borderRadius: 24,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.25,
+          shadowRadius: 18,
         },
         tabBarActiveTintColor: '#818cf8',
-        tabBarInactiveTintColor: '#475569',
+        tabBarInactiveTintColor: '#64748b',
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '800',
-          marginTop: 2,
+          marginTop: 1,
           textTransform: 'uppercase',
-          letterSpacing: 0.5,
+          letterSpacing: 0,
+        },
+        tabBarItemStyle: {
+          height: 52,
+          borderRadius: 18,
         },
         headerShown: false,
       }}

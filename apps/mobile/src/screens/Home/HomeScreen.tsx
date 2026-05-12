@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, RefreshControl, Dimensions, Animated } from 'react-native';
-import { Play, Calendar, Bell, ArrowRight, Heart, Users, Bookmark, Search, Headphones, BookOpen, Clock } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, Animated } from 'react-native';
+import { Play, Calendar, Bell, ArrowRight, Heart, Users, Search, Headphones, BookOpen, Clock } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { getCachedData } from '../../utils/storage';
@@ -15,6 +16,7 @@ const SOCKET_URL = API_URL.replace('/api', '').replace('https://', 'wss://').rep
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const [liveStatus, setLiveStatus] = useState<any>(null);
   const [recentSermons, setRecentSermons] = useState<any[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
@@ -169,9 +171,14 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.floatingHeader, { opacity: headerOpacity }]}>
+      <Animated.View style={[styles.floatingHeader, { paddingTop: insets.top + 10, opacity: headerOpacity }]}>
         <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
-        <Text style={styles.floatingTitle}>Praise Impact</Text>
+        <View style={styles.floatingHeaderInner}>
+          <View style={styles.brandMarkSmall}>
+            <Text style={styles.brandMarkTextSmall}>PI</Text>
+          </View>
+          <Text style={styles.floatingTitle}>Praise Impact</Text>
+        </View>
       </Animated.View>
 
       <Animated.ScrollView 
@@ -181,15 +188,32 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#818cf8" />}
       >
         <Animated.View style={{ opacity: fadeAnim }}>
-          <View style={styles.heroSection}>
+          <View style={[styles.heroSection, { paddingTop: insets.top + 18 }]}>
             <View style={styles.header}>
-              <View>
-                <Text style={styles.welcomeText}>Welcome home,</Text>
-                <Text style={styles.brandName}>Praise Impact</Text>
+              <View style={styles.headerIdentity}>
+                <LinearGradient colors={['#818cf8', '#14b8a6']} style={styles.brandMark}>
+                  <Text style={styles.brandMarkText}>PI</Text>
+                </LinearGradient>
+                <View style={styles.headerCopy}>
+                  <Text style={styles.welcomeText}>Welcome home</Text>
+                  <Text style={styles.brandName}>Praise Impact</Text>
+                  <View style={styles.servicePill}>
+                    <View style={[styles.serviceDot, liveStatus?.is_live && styles.serviceDotLive]} />
+                    <Text style={styles.servicePillText}>
+                      {liveStatus?.is_live ? 'Live service is on' : `${nextService.day} at ${nextService.time}`}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <TouchableOpacity style={styles.avatarBtn}>
-                <Image source={{ uri: 'https://api.dicebear.com/7.x/avataaars/svg?seed=praise' }} style={styles.avatar} />
-              </TouchableOpacity>
+              <View style={styles.headerActions}>
+                <TouchableOpacity style={styles.headerActionBtn} activeOpacity={0.8}>
+                  <Search color="#cbd5e1" size={19} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.headerActionBtn} activeOpacity={0.8}>
+                  <Bell color="#cbd5e1" size={19} />
+                  <View style={styles.notificationDot} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.pulseContainer}>
@@ -224,7 +248,7 @@ export default function HomeScreen() {
                   <LinearGradient colors={['rgba(15, 23, 42, 0.4)', 'rgba(15, 23, 42, 0.95)']} style={StyleSheet.absoluteFill} />
                   <View style={styles.nextServiceContent}>
                     <Text style={styles.nextLabel}>NEXT SERVICE</Text>
-                    <Text style={styles.nextTime}>{nextService.name} • {nextService.day}, {nextService.time}</Text>
+                    <Text style={styles.nextTime}>{nextService.name} | {nextService.day}, {nextService.time}</Text>
                     <View style={styles.countdownRow}>
                       <View style={styles.timePill}>
                         <Text style={styles.timeValue}>{String(countdown.days).padStart(2, '0')}</Text>
@@ -352,14 +376,26 @@ const BlurView = ({ style, intensity, tint }: any) => (
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f172a' },
-  floatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, height: Platform.OS === 'ios' ? 100 : 70, zIndex: 10, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 12 },
-  floatingTitle: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: -0.5 },
-  heroSection: { paddingTop: Platform.OS === 'ios' ? 60 : 40, paddingBottom: 20 },
-  header: { paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-  welcomeText: { color: '#64748b', fontSize: 14, fontWeight: '600' },
-  brandName: { color: '#fff', fontSize: 26, fontWeight: '900', letterSpacing: -1 },
-  avatarBtn: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: '#334155', overflow: 'hidden', backgroundColor: '#1e293b' },
-  avatar: { width: '100%', height: '100%' },
+  floatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, minHeight: 72, zIndex: 10, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(148, 163, 184, 0.12)' },
+  floatingHeaderInner: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  floatingTitle: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 0 },
+  brandMarkSmall: { width: 28, height: 28, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#312e81', borderWidth: 1, borderColor: 'rgba(129, 140, 248, 0.45)' },
+  brandMarkTextSmall: { color: '#e0e7ff', fontSize: 11, fontWeight: '900', letterSpacing: 0 },
+  heroSection: { paddingBottom: 20 },
+  header: { paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 14 },
+  headerIdentity: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  headerCopy: { flex: 1, minWidth: 0 },
+  brandMark: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', shadowColor: '#14b8a6', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 14, elevation: 8 },
+  brandMarkText: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 0 },
+  welcomeText: { color: '#94a3b8', fontSize: 13, fontWeight: '700' },
+  brandName: { color: '#fff', fontSize: 25, fontWeight: '900', letterSpacing: 0 },
+  servicePill: { alignSelf: 'flex-start', marginTop: 6, flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: 'rgba(30, 41, 59, 0.92)', borderWidth: 1, borderColor: 'rgba(148, 163, 184, 0.14)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14 },
+  serviceDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#14b8a6' },
+  serviceDotLive: { backgroundColor: '#ef4444' },
+  servicePillText: { color: '#cbd5e1', fontSize: 11, fontWeight: '800' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  headerActionBtn: { width: 42, height: 42, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(30, 41, 59, 0.9)', borderWidth: 1, borderColor: 'rgba(148, 163, 184, 0.14)' },
+  notificationDot: { position: 'absolute', top: 10, right: 11, width: 7, height: 7, borderRadius: 4, backgroundColor: '#f43f5e', borderWidth: 1, borderColor: '#0f172a' },
   pulseContainer: { paddingHorizontal: 20 },
   liveHero: { height: 240, borderRadius: 32, overflow: 'hidden', shadowColor: '#6366f1', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 12 },
   liveContent: { flex: 1, padding: 24, justifyContent: 'flex-end' },

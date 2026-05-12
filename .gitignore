@@ -29,11 +29,8 @@ obj/
 
 # Local env files
 .env*.local
-.env
-.env.test
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -41,3 +38,4 @@ obj/
 # Prisma
 # Generated Prisma Client should be ignored if it's large and can be regenerated
 **/generated
+config.bat
